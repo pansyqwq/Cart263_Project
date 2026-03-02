@@ -38,7 +38,7 @@ function go() {
   // Add a 'change' event listener
   document
     .querySelector("#sound_dropdown")
-    .addEventListener("change", async function (event) {
+    .addEventListener("change", async function (event) { //wait for everything to load
       // The event.target property refers to the select element
       const selectedValue = event.target.value;
 
@@ -51,7 +51,7 @@ function go() {
           soundPlaying = false;
         }
 
-        audioSource = await getAudio(`sounds/${selectedValue}`);
+        audioSource = await getAudio(`sounds/${selectedValue}`); //
         console.log(`loaded audio source: ${selectedValue}`);
         document.querySelector("#message").innerHTML =
           `loaded audio source: ${selectedValue}`;
