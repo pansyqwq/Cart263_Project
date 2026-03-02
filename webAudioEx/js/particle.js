@@ -1,6 +1,6 @@
 class Particle { //class group a set of data, needed if we need namy particle with variation of data
   constructor(x, y, canvas, context) { //the constructor is what makes it, we call the constructor
-    this.x = x;//randomly placing x and y 
+    this.x = x;
     this.y = y;
     this.scale = Math.random();
     this.speedX = 0;
