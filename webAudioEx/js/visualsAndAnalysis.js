@@ -4,7 +4,7 @@ function analyzeSpectrum(inputSource, audioContext) {
   const analyser = audioContext.createAnalyser();
   inputSource.connect(analyser);
 
-  analyser.fftSize = 256;
+  analyser.fftSize = 256;// the more ou have the more bins you have, it have to be the multiple of 8 
 
   console.log(analyser.frequencyBinCount); // HALF OF FFT SIZE -> total number of data points available
 
@@ -17,12 +17,12 @@ function analyzeSpectrum(inputSource, audioContext) {
   let context = canvas.getContext("2d");
 
   //call loop ...
-  requestAnimationFrame(animateFrequenciesSpectrum);
+  requestAnimationFrame(animateFrequenciesSpectrum);// basically a call function
 
-  /****our looping callback function */
+  /****our looping callback function */ 
   function animateFrequenciesSpectrum() {
     context.clearRect(0, 0, canvas.width, canvas.height);
-    analyser.getByteFrequencyData(frequencyData);
+    analyser.getByteFrequencyData(frequencyData);// get the range of frequencies
 
     context.fillStyle = "rgb(0 0 0)";
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -132,8 +132,8 @@ function analyzeAndApplyToParticles(inputSource, audioContext, duration) {
   }, duration);
 
   for (let i = 0; i < analyser.frequencyBinCount; i++) {
-    let x = mapNumRange(i, 0, analyser.frequencyBinCount, 0, canvas.width * 2);
-    let y = Math.random() * canvas.height;
+    let x = mapNumRange(i, 0, analyser.frequencyBinCount, 0, canvas.width * 2); //generating x according to the frequency, the frequency wasn't detected at this point, we are just dividing the canvas into sections for this line
+    let y = Math.random() * canvas.height;//randomizing y
     particles[i] = new Particle(x, y, canvas, context);
   }
 
@@ -167,7 +167,7 @@ function analyzeAndApplyToParticles(inputSource, audioContext, duration) {
     for (let i = 0; i < analyser.frequencyBinCount; i++) {
       //console.log(frequencyData[i])
 
-      let thisLevel = mapNumRange(frequencyData[i], 0, 255, 0, 1);
+      let thisLevel = mapNumRange(frequencyData[i], 0, 255, 0, 1);// the frequeny is between 0 and 255, but we set it between 0 and 1
 
       // update values based on amplitude at this part of the frequency spectrum
       particles[i].update(thisLevel);
@@ -265,6 +265,7 @@ function getAmplitude(inputSource, audioContext, duration) {
 }
 
 /***************************HELPER************************** */
+
 const mapNumRange = function (num, inMin, inMax, outMin, outMax) {
   return ((num - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 };

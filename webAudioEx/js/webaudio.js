@@ -13,8 +13,9 @@ function go() {
     note.offsetDuration = 3;
     let now = audioContext.currentTime;
     note.play(freq, now);
+    //test out different types of note
     //analyzeSpectrum(note.oscillator,audioContext,note.offsetDuration*1000);
-    //analyzeSpectrumTime(note.oscillator,audioContext,note.offsetDuration*1000)
+    // analyzeSpectrumTime(note.oscillator,audioContext,note.offsetDuration*1000)
     //getAmplitude(note.oscillator,audioContext,note.offsetDuration*1000)
 
 
@@ -38,9 +39,9 @@ function go() {
   // Add a 'change' event listener
   document
     .querySelector("#sound_dropdown")
-    .addEventListener("change", async function (event) { //wait for everything to load
+    .addEventListener("change", async function (event) { //wait for everything to load, change is an event, async function is the function triggered by the event (call back functionj)
       // The event.target property refers to the select element
-      const selectedValue = event.target.value;
+      const selectedValue = event.target.value; // go look for the select section
 
       if (selectedValue !== "select") {
         console.log(selectedValue);
@@ -51,7 +52,7 @@ function go() {
           soundPlaying = false;
         }
 
-        audioSource = await getAudio(`sounds/${selectedValue}`); //
+        audioSource = await getAudio(`sounds/${selectedValue}`); //loading the file into memory 
         console.log(`loaded audio source: ${selectedValue}`);
         document.querySelector("#message").innerHTML =
           `loaded audio source: ${selectedValue}`;
@@ -72,7 +73,7 @@ function go() {
 
       // first time playing
       else if (soundPlaying === false) {
-        audioSource.connect(audioContext.destination);
+        audioSource.connect(audioContext.destination);//the destination is your speaker
         audioSource.start(0);
         audioSource.loop = true;
         soundPlaying = true;

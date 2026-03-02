@@ -1,6 +1,6 @@
-class Particle {
-  constructor(x, y, canvas, context) {
-    this.x = x;
+class Particle { //class group a set of data, needed if we need namy particle with variation of data
+  constructor(x, y, canvas, context) { //the constructor is what makes it, we call the constructor
+    this.x = x;//randomly placing x and y 
     this.y = y;
     this.scale = Math.random();
     this.speedX = 0;
@@ -10,7 +10,7 @@ class Particle {
       g: Math.floor(Math.random() * 255),
       b: Math.floor(Math.random() * 255),
     };
-    this.canvas = canvas;
+    this.canvas = canvas;//we need the canvas and the contect in the particle object class, allowing things to share information 
     this.context = context;
     this.startAngle = 0;
     this.endAngle = Math.PI * 2; //full rotation
@@ -29,7 +29,7 @@ class Particle {
 
   draw() {
     this.context.beginPath();
-    this.context.fillStyle =  `rgba(${this.color.r},${this.color.g},${this.color.b},255)`;
+    this.context.fillStyle =  `rgba(${this.color.r},${this.color.g},${this.color.b},255)`;// the color changes according to the x and y 
     this.context.arc(this.x, this.y, this.diameter/2,this.startAngle, this.endAngle, true);
     this.context.fill(); // set the fill
     this.context.closePath();
