@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wowaka: Audio Visual</title>
     <link rel="stylesheet" href="styles.css" />
+
 </head>
 
 <body>
@@ -14,7 +15,12 @@
         <div class="brand">
             <button id="playPause">▶</button>
             <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" />
-        </div>
+        </div><select id="songSelect">
+            <option value="webAudioEx/sounds/rolling_girl.mp3">Rolling Girl</option>
+            <option value="webAudioEx/sounds/zureteiku.mp3">Zureteiku</option>
+        </select>
+
+        <audio id="audio"></audio>
 
         <button class="about-btn">About This Project</button>
     </header>
@@ -27,9 +33,11 @@
         </section>
 
         <h1 class="artist">WOWAKA</h1>
+
     </main>
 
     <script src="script.js"></script>
+    <script src="audio.js"></script>
 </body>
 
 </html>
