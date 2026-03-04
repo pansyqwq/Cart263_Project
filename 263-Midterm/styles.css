@@ -71,66 +71,71 @@ main {
     font-size: clamp(3rem, 13vw, 12rem);
     font-weight: 700;
     line-height: 1;
-    letter-spacing: 0.1em;
 }
 
-.text {
-    max-width: 70vw;
-    margin: 0 auto;
-}
+/* ---------- AUDIO CONTROLS ---------- */
 
-/* -- Changes colour for Volume Slider Input based on Browser -- */
-
-/* Remove default appearance */
-#volumeSlider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 200px;
-    height: 6px;
-    background: transparent;
+#songSelect {
+    background: #767676;
+    border: none;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.95rem;
+    color: #e3e3e3;
+    font-weight: bold;
     cursor: pointer;
 }
 
-/* Track (Chrome, Safari, Edge) */
-#volumeSlider::-webkit-slider-runnable-track {
-    height: 6px;
-    background: #05090A;
-    /* track color */
-    border-radius: 3px;
+
+#songSelect:hover {
+    filter: brightness(0.97);
 }
 
-/* Thumb (Chrome, Safari, Edge) */
-#volumeSlider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    height: 16px;
-    width: 16px;
-    background: #05090A;
-    /* thumb color */
-    border-radius: 50%;
-    margin-top: -5px;
-    /* centers thumb on track */
+#songSelect:focus {
+    outline: 2px solid #05090A;
+    outline-offset: 2px;
 }
 
-/* Firefox Track */
-#volumeSlider::-moz-range-track {
-    height: 6px;
-    background: #05090A;
-    border-radius: 3px;
-}
-
-/* Firefox Thumb */
-#volumeSlider::-moz-range-thumb {
-    height: 16px;
-    width: 16px;
-    background: #05090A;
-    border: none;
-    border-radius: 50%;
-}
-
+/* Play button styling */
 #playPause {
-    background: none;
+    background: #a3a3a3;
     border: none;
-    padding: 0;
-    font-size: 2rem;
+    width: 34px;
+    height: 34px;
     cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+#playPause:hover {
+    filter: brightness(0.97);
+}
+
+#playPause:active {
+    transform: scale(0.98);
+}
+
+/* Volume slider track */
+#volumeSlider::-webkit-slider-runnable-track {
+  background: #d9d9d9;   
+  height: 6px;
+  border-radius: 3px;
+}
+
+/* Volume slider knob */
+#volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #05090A;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-top: -4px; /* centers the knob */
+}
+
+/* remove default styling */
+#volumeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 140px;
 }
