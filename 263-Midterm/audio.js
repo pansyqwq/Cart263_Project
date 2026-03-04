@@ -6,6 +6,7 @@ function go() {
   const playStopBtn = document.querySelector("#playStop");
   const volumeSlider = document.querySelector("#volumeSlider");
   const songSelect = document.querySelector("#songSelect");
+  const songTitle = document.querySelector("#songtitle");
   const visualsContainer = document.querySelector(".a-visuals");
   const pauseBtn = document.querySelector("#pause");
 
@@ -83,6 +84,11 @@ function go() {
     }
   }
 
+  // Changes song title based on current song
+  function updateSongTitle() {
+    songTitle.textContent = songSelect.options[songSelect.selectedIndex].text;
+  }
+
   // If window resizes, keep the circle centered
   window.addEventListener("resize", () => {
     if (currentVisual) {
@@ -156,6 +162,7 @@ function go() {
     try {
       currentBuffer = await loadBuffer(songSelect.value);
       playStopBtn.textContent = "▶";
+      updateSongTitle();
     } catch (e) {
       console.error(e);
     }
@@ -163,6 +170,7 @@ function go() {
 
   // 2) Dropdown change: load new song
   songSelect.addEventListener("change", async () => {
+    updateSongTitle();
     const path = songSelect.value;
 
     // stop current audio + visuals
