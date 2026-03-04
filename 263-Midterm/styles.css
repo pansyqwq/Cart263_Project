@@ -13,7 +13,7 @@ body {
     flex-direction: column;
 }
 
-/* ---------- HEADER ---------- */
+/* -- Header -- */
 
 .top-bar {
     display: flex;
@@ -37,7 +37,7 @@ body {
     cursor: pointer;
 }
 
-/* ---------- MAIN CONTENT ---------- */
+/* -- Main -- */
 
 main {
     flex: 1;
@@ -46,46 +46,46 @@ main {
     padding: 0 1rem;
 }
 
-/* Big visual area */
+/* -- Visual Area for Audio Visual -- */
 .a-visuals {
     flex: 1;
-    /* fills all remaining space */
     width: 100%;
 }
 
-/* Song info inline */
-.song-info {
-    display: flex;
-    justify-content: center;
-    align-items: baseline;
-}
-
 .song-info h2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
     font-size: clamp(1.8rem, 4vw, 3.5rem);
     font-weight: 400;
+    margin: 0;
 }
 
-.song-info h3 {
+#featuring {
     font-size: clamp(1rem, 1vw, 1.5rem);
     font-weight: 400;
 }
 
-/* Artist pinned to bottom naturally */
 .artist {
     text-align: center;
     font-size: clamp(3rem, 13vw, 12rem);
     font-weight: 700;
     line-height: 1;
+    letter-spacing: 0.1em;
 }
 
-/* ---------- AUDIO CONTROLS ---------- */
+.text {
+    max-width: 950px;
+    margin: 0 auto;
+}
+
+/* -- Audio Controls -- */
 
 #songSelect {
-    background: #767676;
     border: none;
     padding: 0.45rem 0.7rem;
     font-size: 0.95rem;
-    color: #e3e3e3;
+    color: #05090A;
     font-weight: bold;
     cursor: pointer;
 }
@@ -102,13 +102,11 @@ main {
 
 /* Play button styling */
 #playPause {
-    background: #a3a3a3;
+    background: none;
     border: none;
-    width: 34px;
-    height: 34px;
+    padding: 0;
+    font-size: 2rem;
     cursor: pointer;
-    display: grid;
-    place-items: center;
 }
 
 #playPause:hover {
@@ -135,7 +133,7 @@ main {
   background: #05090A;
   border-radius: 50%;
   cursor: pointer;
-  margin-top: -4px; /* centers the knob */
+  margin-top: -4px;
 }
 
 /* remove default styling */
@@ -144,3 +142,4 @@ main {
   appearance: none;
   width: 140px;
 }
+
