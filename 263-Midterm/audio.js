@@ -14,39 +14,39 @@ function go() {
     return;
   }
 
-  /* ==================== VISUALS (JS-only styling) ==================== */
-  class GreyCircle {
-    constructor(container, size = 160, color = "#d9d9d9") {
-      this.container = container;
-      this.size = size;
-      this.color = color;
-      this.el = document.createElement("div");
-    }
+//   /* ==================== VISUALS  ==================== */
+//   class GreyCircle {
+//     constructor(container, size = 160, color = "#d9d9d9") {
+//       this.container = container;
+//       this.size = size;
+//       this.color = color;
+//       this.el = document.createElement("div");
+//     }
 
-    render() {
-      // make sure container can position absolute children
-      this.container.style.position = "relative";
+//     render() {
+//       // make sure container can position absolute children
+//       this.container.style.position = "relative";
 
-      const centerX = this.container.clientWidth / 2;
-      const centerY = this.container.clientHeight / 2;
+//       const centerX = this.container.clientWidth / 2;
+//       const centerY = this.container.clientHeight / 2;
 
-      this.el.style.position = "absolute";
-      this.el.style.width = this.size + "px";
-      this.el.style.height = this.size + "px";
-      this.el.style.background = this.color;
-      this.el.style.borderRadius = "50%";
+//       this.el.style.position = "absolute";
+//       this.el.style.width = this.size + "px";
+//       this.el.style.height = this.size + "px";
+//       this.el.style.background = this.color;
+//       this.el.style.borderRadius = "50%";
 
-      // center it
-      this.el.style.left = (centerX - this.size / 2) + "px";
-      this.el.style.top = (centerY - this.size / 2) + "px";
+//       // center it
+//       this.el.style.left = (centerX - this.size / 2) + "px";
+//       this.el.style.top = (centerY - this.size / 2) + "px";
 
-      this.container.appendChild(this.el);
-    }
+//       this.container.appendChild(this.el);
+//     }
 
-    remove() {
-      this.el.remove();
-    }
-  }
+//     remove() {
+//       this.el.remove();
+//     }
+//   }
 
   let currentVisual = null;
 
@@ -110,7 +110,7 @@ function go() {
   function startFromBuffer(loop = true) {
     if (!currentBuffer) return;
 
-    stopSource(); // stop old one if any (also clears visuals)
+    stopSource(); // stop old one if any
 
     currentSource = audioContext.createBufferSource();
     currentSource.buffer = currentBuffer;
@@ -131,7 +131,7 @@ function go() {
     }
   }
 
-  // 1) Load initial song (from first option)
+  // 1) Load initial song
   (async () => {
     try {
       currentBuffer = await loadBuffer(songSelect.value);
@@ -151,12 +151,12 @@ function go() {
     try {
       currentBuffer = await loadBuffer(path);
 
-      // Don't autoplay. User clicks play.
+      //User clicks play.
       playPauseBtn.textContent = "▶";
 
       // If you WANT autoplay on change, uncomment:
-      // await ensureAudioRunning();
-      // startFromBuffer(true);
+      await ensureAudioRunning();
+      startFromBuffer(true);
 
     } catch (e) {
       console.error(e);
