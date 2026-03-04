@@ -77,3 +77,70 @@ main {
     font-weight: 700;
     line-height: 1;
 }
+
+/* ---------- AUDIO CONTROLS ---------- */
+
+#songSelect {
+    background: #767676;
+    border: none;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.95rem;
+    color: #e3e3e3;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+
+#songSelect:hover {
+    filter: brightness(0.97);
+}
+
+#songSelect:focus {
+    outline: 2px solid #05090A;
+    outline-offset: 2px;
+}
+
+/* Play button styling */
+#playPause {
+    background: #a3a3a3;
+    border: none;
+    width: 34px;
+    height: 34px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+#playPause:hover {
+    filter: brightness(0.97);
+}
+
+#playPause:active {
+    transform: scale(0.98);
+}
+
+/* Volume slider track */
+#volumeSlider::-webkit-slider-runnable-track {
+  background: #d9d9d9;   
+  height: 6px;
+  border-radius: 3px;
+}
+
+/* Volume slider knob */
+#volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #05090A;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-top: -4px; /* centers the knob */
+}
+
+/* remove default styling */
+#volumeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 140px;
+}
