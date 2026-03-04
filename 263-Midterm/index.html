@@ -13,7 +13,8 @@
 
     <header class="top-bar">
         <div class="brand">
-            <button id="playPause">▶</button>
+            <button id="playStop">▶</button>
+            <button id="pause">⏸</button>
             <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" />
             <select id="songSelect">
                 <option value="sounds/rolling_girl.mp3">Rolling Girl</option>
@@ -30,16 +31,15 @@
         <div class="a-visuals"></div>
         <div class="text">
         <section class="song-info">
-            <h2>UNKNOWN MOTHER GOOSE <span id="featuring">feat. 初音ミク</span></h2>
+            <h2><span id="#songtitle">UNKNOWN MOTHER GOOSE</span> <span id="featuring">feat. 初音ミク</span></h2>
         </section>
 
         <h1 class="artist">WOWAKA</h1>
         </div>
     </main>
-   
-    <script src="script.js"></script>
+
     <script src="audio.js"></script>
- <script src="zureteiku.js"></script>
+    <script src="zureteiku.js"></script>
 </body>
 
 </html>

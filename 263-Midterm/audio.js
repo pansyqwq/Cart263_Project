@@ -3,50 +3,59 @@ window.onload = go;
 function go() {
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-  const playPauseBtn = document.querySelector("#playPause");
+  const playStopBtn = document.querySelector("#playStop");
   const volumeSlider = document.querySelector("#volumeSlider");
   const songSelect = document.querySelector("#songSelect");
   const visualsContainer = document.querySelector(".a-visuals");
+  const pauseBtn = document.querySelector("#pause");
 
   // safety check
-  if (!playPauseBtn || !volumeSlider || !songSelect || !visualsContainer) {
-    console.error("Missing UI element(s). Check IDs: #playPause #volumeSlider #songSelect and .a-visuals");
+  if (
+    !playStopBtn ||
+    !pauseBtn ||
+    !volumeSlider ||
+    !songSelect ||
+    !visualsContainer
+  ) {
+    console.error(
+      "Missing UI element(s). Check IDs: #playStop #volumeSlider #songSelect and .a-visuals",
+    );
     return;
   }
 
-//   /* ==================== VISUALS  ==================== */
-//   class GreyCircle {
-//     constructor(container, size = 160, color = "#d9d9d9") {
-//       this.container = container;
-//       this.size = size;
-//       this.color = color;
-//       this.el = document.createElement("div");
-//     }
+  // /* ==================== VISUALS  ==================== */
+  // class GreyCircle {
+  //   constructor(container, size = 160, color = "#d9d9d9") {
+  //     this.container = container;
+  //     this.size = size;
+  //     this.color = color;
+  //     this.el = document.createElement("div");
+  //   }
 
-//     render() {
-//       // make sure container can position absolute children
-//       this.container.style.position = "relative";
+  //   render() {
+  //     // make sure container can position absolute children
+  //     this.container.style.position = "relative";
 
-//       const centerX = this.container.clientWidth / 2;
-//       const centerY = this.container.clientHeight / 2;
+  //     const centerX = this.container.clientWidth / 2;
+  //     const centerY = this.container.clientHeight / 2;
 
-//       this.el.style.position = "absolute";
-//       this.el.style.width = this.size + "px";
-//       this.el.style.height = this.size + "px";
-//       this.el.style.background = this.color;
-//       this.el.style.borderRadius = "50%";
+  //     this.el.style.position = "absolute";
+  //     this.el.style.width = this.size + "px";
+  //     this.el.style.height = this.size + "px";
+  //     this.el.style.background = this.color;
+  //     this.el.style.borderRadius = "50%";
 
-//       // center it
-//       this.el.style.left = (centerX - this.size / 2) + "px";
-//       this.el.style.top = (centerY - this.size / 2) + "px";
+  //     // center it
+  //     this.el.style.left = centerX - this.size / 2 + "px";
+  //     this.el.style.top = centerY - this.size / 2 + "px";
 
-//       this.container.appendChild(this.el);
-//     }
+  //     this.container.appendChild(this.el);
+  //   }
 
-//     remove() {
-//       this.el.remove();
-//     }
-//   }
+  //   remove() {
+  //     this.el.remove();
+  //   }
+  // }
 
   let currentVisual = null;
 
@@ -63,7 +72,10 @@ function go() {
 
     // Only show circle when Zureteiku is the selected song AND audio is playing
     const path = songSelect.value.toLowerCase();
-    const isZureteiku = path.includes("zureteiku") || path.includes("ずれていく") || path.includes("zure");
+    const isZureteiku =
+      path.includes("zureteiku") ||
+      path.includes("ずれていく") ||
+      path.includes("zure");
 
     if (isPlaying && isZureteiku) {
       currentVisual = new GreyCircle(visualsContainer, 180, "#d9d9d9");
@@ -82,6 +94,7 @@ function go() {
   let currentBuffer = null;
   let currentSource = null;
   let isPlaying = false;
+  let isPaused = false;
 
   // volume control using GainNode
   const gainNode = audioContext.createGain();
@@ -90,18 +103,25 @@ function go() {
 
   async function loadBuffer(filePath) {
     const res = await fetch(filePath);
-    if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+    if (!res.ok)
+      throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
     const arr = await res.arrayBuffer();
     return await audioContext.decodeAudioData(arr);
   }
 
   function stopSource() {
     if (currentSource) {
-      try { currentSource.stop(); } catch (e) {}
-      try { currentSource.disconnect(); } catch (e) {}
+      try {
+        currentSource.stop();
+      } catch (e) {}
+      try {
+        currentSource.disconnect();
+      } catch (e) {}
       currentSource = null;
     }
     isPlaying = false;
+    isPaused = false;
+    pauseBtn.textContent = "⏸";
 
     // visuals should disappear when stopped
     clearVisual();
@@ -119,7 +139,7 @@ function go() {
     currentSource.start(0);
 
     isPlaying = true;
-    playPauseBtn.textContent = "⏹";
+    playStopBtn.textContent = "⏹";
 
     // show visuals if needed
     updateVisualForCurrentSong();
@@ -135,7 +155,7 @@ function go() {
   (async () => {
     try {
       currentBuffer = await loadBuffer(songSelect.value);
-      playPauseBtn.textContent = "▶";
+      playStopBtn.textContent = "▶";
     } catch (e) {
       console.error(e);
     }
@@ -152,19 +172,18 @@ function go() {
       currentBuffer = await loadBuffer(path);
 
       //User clicks play.
-      playPauseBtn.textContent = "▶";
+      playStopBtn.textContent = "▶";
 
       // If you WANT autoplay on change, uncomment:
       await ensureAudioRunning();
       startFromBuffer(true);
-
     } catch (e) {
       console.error(e);
     }
   });
 
-  // 3) Play/pause button
-  playPauseBtn.addEventListener("click", async () => {
+  // 3) Play/stop button
+  playStopBtn.addEventListener("click", async () => {
     await ensureAudioRunning();
 
     if (!currentBuffer) return;
@@ -172,12 +191,31 @@ function go() {
     if (!isPlaying) {
       startFromBuffer(true);
     } else {
-      await audioContext.suspend();
-      isPlaying = false;
-      playPauseBtn.textContent = "▶";
+      stopSource();
+      playStopBtn.textContent = "▶";
 
-      // hide visuals when paused
+      // hide visuals when stopped
       clearVisual();
+    }
+  });
+
+  pauseBtn.addEventListener("click", async () => {
+    if (!currentSource) return;
+
+    if (!isPaused) {
+      await audioContext.suspend();
+      isPaused = true;
+      isPlaying = false;
+
+      pauseBtn.textContent = "▶";
+      pauseBtn.classList.add("is-paused");
+    } else {
+      await audioContext.resume();
+      isPaused = false;
+      isPlaying = true;
+
+      pauseBtn.textContent = "⏸";
+      pauseBtn.classList.remove("is-paused");
     }
   });
 
