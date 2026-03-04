@@ -6,18 +6,84 @@ function go() {
   const playPauseBtn = document.querySelector("#playPause");
   const volumeSlider = document.querySelector("#volumeSlider");
   const songSelect = document.querySelector("#songSelect");
+  const visualsContainer = document.querySelector(".a-visuals");
 
-  // safety check (prevents null addEventListener crashes)
-  if (!playPauseBtn || !volumeSlider || !songSelect) {
-    console.error("Missing UI element(s). Check IDs: #playPause #volumeSlider #songSelect");
+  // safety check
+  if (!playPauseBtn || !volumeSlider || !songSelect || !visualsContainer) {
+    console.error("Missing UI element(s). Check IDs: #playPause #volumeSlider #songSelect and .a-visuals");
     return;
   }
 
+  /* ==================== VISUALS (JS-only styling) ==================== */
+  class GreyCircle {
+    constructor(container, size = 160, color = "#d9d9d9") {
+      this.container = container;
+      this.size = size;
+      this.color = color;
+      this.el = document.createElement("div");
+    }
+
+    render() {
+      // make sure container can position absolute children
+      this.container.style.position = "relative";
+
+      const centerX = this.container.clientWidth / 2;
+      const centerY = this.container.clientHeight / 2;
+
+      this.el.style.position = "absolute";
+      this.el.style.width = this.size + "px";
+      this.el.style.height = this.size + "px";
+      this.el.style.background = this.color;
+      this.el.style.borderRadius = "50%";
+
+      // center it
+      this.el.style.left = (centerX - this.size / 2) + "px";
+      this.el.style.top = (centerY - this.size / 2) + "px";
+
+      this.container.appendChild(this.el);
+    }
+
+    remove() {
+      this.el.remove();
+    }
+  }
+
+  let currentVisual = null;
+
+  function clearVisual() {
+    if (currentVisual) {
+      currentVisual.remove();
+      currentVisual = null;
+    }
+  }
+
+  function updateVisualForCurrentSong() {
+    // clear first so we don't stack shapes
+    clearVisual();
+
+    // Only show circle when Zureteiku is the selected song AND audio is playing
+    const path = songSelect.value.toLowerCase();
+    const isZureteiku = path.includes("zureteiku") || path.includes("ずれていく") || path.includes("zure");
+
+    if (isPlaying && isZureteiku) {
+      currentVisual = new GreyCircle(visualsContainer, 180, "#d9d9d9");
+      currentVisual.render();
+    }
+  }
+
+  // If window resizes, keep the circle centered
+  window.addEventListener("resize", () => {
+    if (currentVisual) {
+      updateVisualForCurrentSong();
+    }
+  });
+
+  /* ==================== AUDIO ==================== */
   let currentBuffer = null;
   let currentSource = null;
   let isPlaying = false;
 
-  // volume control using GainNode (WebAudio way)
+  // volume control using GainNode
   const gainNode = audioContext.createGain();
   gainNode.gain.value = Number(volumeSlider.value);
   gainNode.connect(audioContext.destination);
@@ -36,12 +102,15 @@ function go() {
       currentSource = null;
     }
     isPlaying = false;
+
+    // visuals should disappear when stopped
+    clearVisual();
   }
 
   function startFromBuffer(loop = true) {
     if (!currentBuffer) return;
 
-    stopSource(); // stop old one if any
+    stopSource(); // stop old one if any (also clears visuals)
 
     currentSource = audioContext.createBufferSource();
     currentSource.buffer = currentBuffer;
@@ -51,6 +120,9 @@ function go() {
 
     isPlaying = true;
     playPauseBtn.textContent = "⏹";
+
+    // show visuals if needed
+    updateVisualForCurrentSong();
   }
 
   async function ensureAudioRunning() {
@@ -63,27 +135,29 @@ function go() {
   (async () => {
     try {
       currentBuffer = await loadBuffer(songSelect.value);
-      // don’t autoplay on load; user clicks play
       playPauseBtn.textContent = "▶";
     } catch (e) {
       console.error(e);
     }
   })();
 
-  // 2) Dropdown change: load new song, and auto-play if currently playing
+  // 2) Dropdown change: load new song
   songSelect.addEventListener("change", async () => {
     const path = songSelect.value;
 
+    // stop current audio + visuals
     stopSource();
 
     try {
       currentBuffer = await loadBuffer(path);
-      if (isPlaying) {
-        await ensureAudioRunning();
-        startFromBuffer(true);
-      } else {
-        playPauseBtn.textContent = "▶";
-      }
+
+      // Don't autoplay. User clicks play.
+      playPauseBtn.textContent = "▶";
+
+      // If you WANT autoplay on change, uncomment:
+      // await ensureAudioRunning();
+      // startFromBuffer(true);
+
     } catch (e) {
       console.error(e);
     }
@@ -98,11 +172,12 @@ function go() {
     if (!isPlaying) {
       startFromBuffer(true);
     } else {
-      // "pause" using suspend (keeps position only if you implement offset tracking;
-      // simplest: suspend audioContext)
       await audioContext.suspend();
       isPlaying = false;
       playPauseBtn.textContent = "▶";
+
+      // hide visuals when paused
+      clearVisual();
     }
   });
 
