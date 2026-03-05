@@ -3,6 +3,12 @@
     margin: 0;
     padding: 0;
 }
+@font-face {
+  font-family: "HelveticaOblique";
+  src: url("fonts/helvetica/Helvetica-Oblique.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
 
 body {
     font-family: Helvetica, Arial, sans-serif;

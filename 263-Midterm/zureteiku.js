@@ -43,7 +43,7 @@ z     → layer order
 */
 class FitCircle {
 
-  constructor(container, refImg, { u, v, size, color, z = 10, dx = 0, dy = 0 }) {
+  constructor(container, refImg, { u, v, size, color, z = 10, dx = 0, dy = 0, label = null }) {
 
     this.container = container;
     this.refImg = refImg;
@@ -59,22 +59,41 @@ class FitCircle {
     this.dx = dx;
     this.dy = dy;
 
-    // Create DOM element
+    this.label = label;
+
     this.el = document.createElement("div");
 
     this.el.style.position = "absolute";
     this.el.style.background = this.color;
     this.el.style.borderRadius = "50%";
-
-    // Guarantees the element always stays a perfect circle
     this.el.style.aspectRatio = "1 / 1";
 
     this.el.style.pointerEvents = "none";
     this.el.style.zIndex = String(this.z);
 
+    // center text inside circle
+    this.el.style.display = "flex";
+    this.el.style.alignItems = "center";
+    this.el.style.justifyContent = "center";
+
     this.container.appendChild(this.el);
 
-    // Initial positioning
+    // If a label exists, add text element
+    if (this.label) {
+      const text = document.createElement("span");
+      text.textContent = this.label;
+
+      text.style.color = "#787878";
+     text.style.fontFamily = "Helvetica-Oblique";
+      text.style.fontWeight = "bold";
+
+      // responsive font size
+      text.style.fontSize = "clamp(10px, 2vmin, 22px)";
+      text.style.textAlign = "center";
+
+      this.el.appendChild(text);
+    }
+
     this.update();
   }
 
@@ -208,7 +227,8 @@ window.showZureteikuVisual = function () {
       color: "#d9d9d9",
       z: 10,
       dx: -20,
-      dy: 60
+      dy: 60,
+      label: "out of step"// the text
     }));
 
   }
