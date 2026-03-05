@@ -1,5 +1,7 @@
+// zureteiku.js
+
 class GreyCircle {
-  constructor(container, size = 160, color = "#d9d9d9") {
+  constructor(container, size = 180, color = "#d9d9d9") {
     this.container = container;
     this.size = size;
     this.color = color;
@@ -7,22 +9,16 @@ class GreyCircle {
   }
 
   render() {
-    // ensure absolute positioning works inside container
-    this.container.style.position = "relative";
-
-    const centerX = this.container.clientWidth / 2;
-    const centerY = this.container.clientHeight / 2;
-
     this.el.style.position = "absolute";
     this.el.style.width = this.size + "px";
-    this.el.style.height = this.size + "px";  
+    this.el.style.height = this.size + "px";
     this.el.style.background = this.color;
     this.el.style.borderRadius = "50%";
-
-    // center it
-    this.el.style.left = centerX - this.size / 2 + "px";
-    this.el.style.top = centerY - this.size / 2 + "px";
-
+    this.el.style.left = "50%";
+    this.el.style.top = "50%";
+    this.el.style.transform = "translate(-50%, -50%)";
+    this.el.style.zIndex = "10";
+    this.el.style.pointerEvents = "none";
     this.container.appendChild(this.el);
   }
 
@@ -31,15 +27,57 @@ class GreyCircle {
   }
 }
 
-/* Global function so audio logic can utilize it */
-function showZureteikuVisual() {
+window.showZureteikuVisual = function () {
   const container = document.querySelector(".a-visuals");
-  if (!container) return null;
+  if (!container) {
+    console.error("No .a-visuals container found");
+    return null;
+  }
 
+  // Make sure container can hold absolute children
+  container.style.position = "relative";
+  container.style.overflow = "hidden";
+
+  // Clear old visuals
+  container.innerHTML = "";
+
+  const files = [
+    "images/One.png",
+    "images/Two.png",
+    "images/Three.png",
+    "images/Four.png",
+    "images/Five.png",
+  ];
+
+  // Add images as layered full-screen backgrounds
+  files.forEach((src, i) => {
+    const img = document.createElement("img");
+    img.src = src;
+
+    // Debug: if image path is wrong, you'll see this in console
+    img.onerror = () => console.error("Image failed to load:", src);
+    img.onload = () => console.log("Loaded image:", src);
+
+    img.style.position = "absolute";
+    img.style.inset = "0";           // top/right/bottom/left = 0
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.objectFit = "cover";
+    img.style.zIndex = String(i);    // stack order
+    img.style.opacity = "1";         // later you can change opacity for collage
+    img.style.display = "block";
+
+    container.appendChild(img);
+  });
+
+  // Circle on top
   const circle = new GreyCircle(container, 180, "#d9d9d9");
   circle.render();
-  return circle;
-}
 
-// Displays visual within window
-window.showZureteikuVisual = showZureteikuVisual;
+  // Return object with remove() so audio.js clearVisual works
+  return {
+    remove() {
+      container.innerHTML = "";
+    },
+  };
+};
