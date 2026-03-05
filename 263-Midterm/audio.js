@@ -46,6 +46,7 @@ function go() {
       currentVisual = window.showZureteikuVisual();
     } else if (isUnknownMotherGoose && typeof window.showHeartVisual === "function") {
       currentVisual = window.showHeartVisual();
+      getAmplitude(sourceNode, audioContext, 999999, currentVisual);
     }
   }
 
