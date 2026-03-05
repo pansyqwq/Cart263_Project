@@ -1,3 +1,4 @@
+// audio.js
 window.onload = go;
 
 function go() {
@@ -11,31 +12,22 @@ function go() {
   const pauseBtn = document.querySelector("#pause");
 
   // safety check
-  if (
-    !playStopBtn ||
-    !pauseBtn ||
-    !volumeSlider ||
-    !songSelect ||
-    !visualsContainer
-  ) {
-    console.error(
-      "Missing UI element(s). Check IDs: #playStop #volumeSlider #songSelect and .a-visuals",
-    );
+  if (!playStopBtn || !pauseBtn || !volumeSlider || !songSelect || !visualsContainer) {
+    console.error("Missing UI element(s). Check IDs: #playStop #pause #volumeSlider #songSelect and .a-visuals");
     return;
   }
 
-
+  /* ==================== VISUALS ==================== */
   let currentVisual = null;
 
   function clearVisual() {
-    if (currentVisual) {
+    if (currentVisual && typeof currentVisual.remove === "function") {
       currentVisual.remove();
-      currentVisual = null;
     }
+    currentVisual = null;
   }
 
   function updateVisualForCurrentSong() {
-    // Clear previous visuals
     clearVisual();
 
     const path = songSelect.value.toLowerCase();
@@ -47,30 +39,25 @@ function go() {
 
     const isUnknownMotherGoose = path.includes("umg");
 
-    // Only show visuals when the song is playing
+    // Only show visuals when music is actually playing
     if (!isPlaying) return;
 
-    // Zureteiku visual
     if (isZureteiku && typeof window.showZureteikuVisual === "function") {
       currentVisual = window.showZureteikuVisual();
-    }
-
-    // UNKNOWN MOTHER-GOOSE visual
-    if (isUnknownMotherGoose && typeof window.showHeartVisual === "function") {
+    } else if (isUnknownMotherGoose && typeof window.showHeartVisual === "function") {
       currentVisual = window.showHeartVisual();
     }
   }
 
-  // Changes song title based on current song
   function updateSongTitle() {
-    songTitle.textContent = songSelect.options[songSelect.selectedIndex].text;
+    if (songTitle) {
+      songTitle.textContent = songSelect.options[songSelect.selectedIndex].text;
+    }
   }
 
-  // If window resizes, keep the circle centered
+  // If window resizes, rebuild the visual (your visual already handles scaling)
   window.addEventListener("resize", () => {
-    if (currentVisual) {
-      updateVisualForCurrentSong();
-    }
+    if (currentVisual && isPlaying) updateVisualForCurrentSong();
   });
 
   /* ==================== AUDIO ==================== */
@@ -79,53 +66,62 @@ function go() {
   let isPlaying = false;
   let isPaused = false;
 
-  // volume control using GainNode
+  // GainNode for volume slider
   const gainNode = audioContext.createGain();
   gainNode.gain.value = Number(volumeSlider.value);
+
+  // AnalyserNode for volume detection
+  const analyser = audioContext.createAnalyser();
+  analyser.fftSize = 1024;
+  const timeData = new Uint8Array(analyser.fftSize);
+
+  // Connect final chain: analyser -> gain -> speakers
+  analyser.connect(gainNode);
   gainNode.connect(audioContext.destination);
 
   async function loadBuffer(filePath) {
     const res = await fetch(filePath);
-    if (!res.ok)
-      throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+    if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
     const arr = await res.arrayBuffer();
     return await audioContext.decodeAudioData(arr);
   }
 
   function stopSource() {
     if (currentSource) {
-      try {
-        currentSource.stop();
-      } catch (e) {}
-      try {
-        currentSource.disconnect();
-      } catch (e) {}
+      try { currentSource.stop(); } catch (e) {}
+      try { currentSource.disconnect(); } catch (e) {}
       currentSource = null;
     }
     isPlaying = false;
     isPaused = false;
     pauseBtn.textContent = "⏸";
 
-    // visuals should disappear when stopped
+    stopVisualLoop();
     clearVisual();
   }
 
   function startFromBuffer(loop = true) {
     if (!currentBuffer) return;
 
-    stopSource(); // stop old one if any
+    stopSource(); // stop old audio + visuals loop
 
     currentSource = audioContext.createBufferSource();
     currentSource.buffer = currentBuffer;
     currentSource.loop = loop;
-    currentSource.connect(gainNode);
+
+    //  audio goes into analyser so we can measure volume
+    currentSource.connect(analyser);
+
     currentSource.start(0);
 
     isPlaying = true;
+    isPaused = false;
     playStopBtn.textContent = "⏹";
+    pauseBtn.textContent = "⏸";
+    pauseBtn.classList.remove("is-paused");
 
-    // show visuals if needed
     updateVisualForCurrentSong();
+    startVisualLoop();
   }
 
   async function ensureAudioRunning() {
@@ -134,7 +130,53 @@ function go() {
     }
   }
 
-  // 1) Load initial song
+  /* ==================== requestAnimationFrame ==================== */
+  let rafId = null;
+
+  function getVolume01() {
+    // Time-domain RMS volume (0..~1)
+    analyser.getByteTimeDomainData(timeData);
+
+    let sum = 0;
+    for (let i = 0; i < timeData.length; i++) {
+      const v = (timeData[i] - 128) / 128; // -1..1
+      sum += v * v;
+    }
+
+    const rms = Math.sqrt(sum / timeData.length); // 0..1
+    return Math.min(1, rms * 2.5); // boost sensitivity
+  }
+
+  function startVisualLoop() {
+    stopVisualLoop();
+
+    let last = performance.now();
+
+    function tick(now) {
+      const dt = (now - last) / 1000;
+      last = now;
+
+      const vol = getVolume01();
+
+      // If visual supports update(vol, dt), call it
+      if (currentVisual && typeof currentVisual.update === "function") {
+        currentVisual.update(vol, dt);
+      }
+
+      rafId = requestAnimationFrame(tick);
+    }
+
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function stopVisualLoop() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+
+  /* ==================== UI EVENTS ==================== */
+
+  // 1) Load initial song buffer (no autoplay)
   (async () => {
     try {
       currentBuffer = await loadBuffer(songSelect.value);
@@ -145,32 +187,27 @@ function go() {
     }
   })();
 
-  // 2) Dropdown change: load new song
+  // 2) Dropdown: load new song (you currently autoplay — keeping your behavior)
   songSelect.addEventListener("change", async () => {
     updateSongTitle();
     const path = songSelect.value;
 
-    // stop current audio + visuals
     stopSource();
 
     try {
       currentBuffer = await loadBuffer(path);
-
-      //User clicks play.
       playStopBtn.textContent = "▶";
 
-      // If you WANT autoplay on change, uncomment:
       await ensureAudioRunning();
-      startFromBuffer(true);
+      startFromBuffer(true); // autoplay on change (your current behavior)
     } catch (e) {
       console.error(e);
     }
   });
 
-  // 3) Play/stop button
+  // 3) Play/Stop
   playStopBtn.addEventListener("click", async () => {
     await ensureAudioRunning();
-
     if (!currentBuffer) return;
 
     if (!isPlaying) {
@@ -178,12 +215,10 @@ function go() {
     } else {
       stopSource();
       playStopBtn.textContent = "▶";
-
-      // hide visuals when stopped
-      clearVisual();
     }
   });
 
+  // 4) Pause/Resume
   pauseBtn.addEventListener("click", async () => {
     if (!currentSource) return;
 
@@ -194,6 +229,8 @@ function go() {
 
       pauseBtn.textContent = "▶";
       pauseBtn.classList.add("is-paused");
+
+      stopVisualLoop(); // stop animation updates while paused
     } else {
       await audioContext.resume();
       isPaused = false;
@@ -201,10 +238,14 @@ function go() {
 
       pauseBtn.textContent = "⏸";
       pauseBtn.classList.remove("is-paused");
+
+      // rebuild visual + restart loop
+      updateVisualForCurrentSong();
+      startVisualLoop();
     }
   });
 
-  // 4) Volume slider
+  // 5) Volume slider (controls gainNode)
   volumeSlider.addEventListener("input", () => {
     gainNode.gain.value = Number(volumeSlider.value);
   });
