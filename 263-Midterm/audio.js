@@ -12,8 +12,16 @@ function go() {
   const pauseBtn = document.querySelector("#pause");
 
   // safety check
-  if (!playStopBtn || !pauseBtn || !volumeSlider || !songSelect || !visualsContainer) {
-    console.error("Missing UI element(s). Check IDs: #playStop #pause #volumeSlider #songSelect and .a-visuals");
+  if (
+    !playStopBtn ||
+    !pauseBtn ||
+    !volumeSlider ||
+    !songSelect ||
+    !visualsContainer
+  ) {
+    console.error(
+      "Missing UI element(s). Check IDs: #playStop #pause #volumeSlider #songSelect and .a-visuals",
+    );
     return;
   }
 
@@ -44,9 +52,13 @@ function go() {
 
     if (isZureteiku && typeof window.showZureteikuVisual === "function") {
       currentVisual = window.showZureteikuVisual();
-    } else if (isUnknownMotherGoose && typeof window.showHeartVisual === "function") {
+    } else if (
+      isUnknownMotherGoose &&
+      typeof window.showHeartVisual === "function"
+    ) {
       currentVisual = window.showHeartVisual();
-      getAmplitude(sourceNode, audioContext, 999999, currentVisual);
+
+      window.getAmplitude(currentSource, audioContext, 999999, currentVisual);
     }
   }
 
@@ -82,15 +94,20 @@ function go() {
 
   async function loadBuffer(filePath) {
     const res = await fetch(filePath);
-    if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+    if (!res.ok)
+      throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
     const arr = await res.arrayBuffer();
     return await audioContext.decodeAudioData(arr);
   }
 
   function stopSource() {
     if (currentSource) {
-      try { currentSource.stop(); } catch (e) {}
-      try { currentSource.disconnect(); } catch (e) {}
+      try {
+        currentSource.stop();
+      } catch (e) {}
+      try {
+        currentSource.disconnect();
+      } catch (e) {}
       currentSource = null;
     }
     isPlaying = false;
@@ -188,7 +205,7 @@ function go() {
     }
   })();
 
-  // 2) Dropdown: load new song (you currently autoplay — keeping your behavior)
+  // 2) Dropdown: load new song
   songSelect.addEventListener("change", async () => {
     updateSongTitle();
     const path = songSelect.value;
@@ -200,7 +217,7 @@ function go() {
       playStopBtn.textContent = "▶";
 
       await ensureAudioRunning();
-      startFromBuffer(true); // autoplay on change (your current behavior)
+      startFromBuffer(true);
     } catch (e) {
       console.error(e);
     }
@@ -230,8 +247,8 @@ function go() {
 
       pauseBtn.textContent = "▶";
       pauseBtn.classList.add("is-paused");
-
-      stopVisualLoop(); // stop animation updates while paused
+      // stop animation updates while paused
+      stopVisualLoop();
     } else {
       await audioContext.resume();
       isPaused = false;

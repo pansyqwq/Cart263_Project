@@ -1,49 +1,70 @@
 class HeartVisual {
-  constructor(container, size = 100, color = "#FF4C4C") {
+  constructor(container, size = 100, color = "#706F6A") {
     this.container = container;
     this.size = size;
     this.color = color;
-    this.heart = document.createElement("div");
+
+    this.wrapper = document.createElement("div");
+    this.left = document.createElement("img");
+    this.right = document.createElement("img");
+
     this.smoothRms = 0;
   }
 
   render() {
-    // Make sure the container can position absolute children
     this.container.style.position = "relative";
 
-    // Sets up the heart text
-    this.heart.textContent = "♥";
-    this.heart.style.position = "absolute";
-    this.heart.style.fontSize = this.size + "px";
-    this.heart.style.color = this.color;
+    // Wrapper to center everything
+    this.wrapper.style.position = "absolute";
+    this.wrapper.style.left = "50%";
+    this.wrapper.style.top = "50%";
+    this.wrapper.style.transform = "translate(-50%, -50%)";
+    this.wrapper.style.display = "flex";
+    this.wrapper.style.alignItems = "center";
 
-    // Centers the heart in window with a vertical offset
-    this.heart.style.left = "50%";
-    this.heart.style.top = "40%";
-    this.heart.style.transform = "translate(-50%, -50%)";
+    // Image/SVG Sources
+    this.left.src = "images/heart1.svg";
+    this.right.src = "images/heart2.svg";
 
-    // Changes the font to look more heart shaped
-    this.heart.style.fontFamily = "'Segoe UI Symbol', 'Arial', sans-serif";
+    // Adds margin to both halves to bring them closer
+    this.left.style.marginRight = "-6px";
+    this.right.style.marginLeft = "-6px";
 
-    // Adds to container
-    this.container.appendChild(this.heart);
+    // Rotates the right heart half
+    this.right.style.transform = "rotate(5deg)";
+
+    // Scale Variable
+    const heartScale = 0.8;
+
+    // Size control
+    this.left.style.width = (this.size / 2) * heartScale + "px";
+    this.right.style.width = (this.size / 2) * heartScale + "px";
+
+    this.left.style.height = "auto";
+    this.right.style.height = "auto";
+
+    // Appends the images and wrapper
+    this.wrapper.appendChild(this.left);
+    this.wrapper.appendChild(this.right);
+    this.container.appendChild(this.wrapper);
   }
 
-  // Enables Heart Visual to accept RMS
+  // RMS Audio Scaling
   updateScale(rms) {
-    // Smooth interpolation
-    this.smoothRms = this.smoothRms * 0.85 + rms * 0.15;
+    this.smoothRms = this.smoothRms * 0.9 + rms * 0.1;
 
-    // Sensitivity control
-    let scale = 1 + this.smoothRms / 60;
+    // Sensitivity of the scale
+    let scale = 1 + this.smoothRms / 380;
+    // Adds a max cap to prevent spikes
+    scale = Math.min(scale, 1.2);
 
-    this.heart.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    this.wrapper.style.transform = `translate(-50%, -50%) scale(${scale})`;
   }
 
   remove() {
-    if (this.heart) {
-      this.heart.remove();
-      this.heart = null;
+    if (this.wrapper) {
+      this.wrapper.remove();
+      this.wrapper = null;
     }
   }
 }
@@ -53,13 +74,16 @@ function showHeartVisual() {
   const container = document.querySelector(".a-visuals");
   if (!container) return null;
 
-  const heart = new HeartVisual(container, 450, "#706F6A");
+  const heart = new HeartVisual(container, 300, "#706F6A");
   heart.render();
   return heart;
 }
 
 // Displays visual within window
 window.showHeartVisual = showHeartVisual;
+
+// Makes RMS function accessible to other scripts
+window.getAmplitude = getAmplitude;
 
 /* Gets the Amplitude from Audio and changes circle */
 function getAmplitude(inputSource, audioContext, duration, heartVisual) {

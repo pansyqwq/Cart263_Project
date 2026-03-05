@@ -24,7 +24,7 @@ class FitCircle {
   constructor(
     container,
     refImg,
-    { u, v, size, color, z = 10, dx = 0, dy = 0, label = null }
+    { u, v, size, color, z = 10, dx = 0, dy = 0, label = null },
   ) {
     this.container = container;
     this.refImg = refImg;
@@ -91,8 +91,8 @@ class FitCircle {
 
     // Size + position
     this.el.style.width = s + "px";
-    this.el.style.left = (cx - s / 2) + "px";
-    this.el.style.top = (cy - s / 2) + "px";
+    this.el.style.left = cx - s / 2 + "px";
+    this.el.style.top = cy - s / 2 + "px";
 
     // Apply audio-driven scale (without breaking position math)
     this.el.style.transform = `scale(${this.scale})`;
@@ -153,13 +153,13 @@ window.showZureteikuVisual = function () {
       img,
       phase: Math.random() * Math.PI * 2,
       baseSpeed: 0.6 + Math.random() * 1.2 + i * 0.08, // each image different initial speed
-      ampBase: 3 + i * 1.5 + Math.random() * 2.5,      // base movement in px
+      ampBase: 3 + i * 1.5 + Math.random() * 2.5, // base movement in px
     });
   });
 
   let circles = [];
   let greyCircle = null; // reference to the top circle
-  let t = 0;             // time accumulator for smooth pulsing
+  let t = 0; // time accumulator for smooth pulsing
 
   function buildCircles() {
     if (!refImg || !refImg.naturalWidth) return;
@@ -176,7 +176,7 @@ window.showZureteikuVisual = function () {
         size: 0.2,
         color: "#868585ff",
         z: -1,
-      })
+      }),
     );
 
     circles.push(
@@ -186,7 +186,7 @@ window.showZureteikuVisual = function () {
         size: 0.18,
         color: "#868585ff",
         z: -1,
-      })
+      }),
     );
 
     // Grey circle (top layer)
@@ -227,7 +227,7 @@ window.showZureteikuVisual = function () {
         d.img.style.transform = `translateY(${y.toFixed(2)}px)`;
       }
 
-      // 2) Pulse the grey circle scale based on volume (like your keyframes)
+      // 2) Pulse the grey circle scale based on volume
       t += dt;
 
       // 8-second breathing wave: 0..1
