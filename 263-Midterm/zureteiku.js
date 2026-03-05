@@ -20,8 +20,8 @@ class GreyCircle {
     this.el.style.borderRadius = "50%";
 
     // center it
-    this.el.style.left = (centerX - this.size / 2) + "px";
-    this.el.style.top = (centerY - this.size / 2) + "px";
+    this.el.style.left = centerX - this.size / 2 + "px";
+    this.el.style.top = centerY - this.size / 2 + "px";
 
     this.container.appendChild(this.el);
   }
@@ -31,7 +31,7 @@ class GreyCircle {
   }
 }
 
-   function showZureteikuVisual() {
+function showZureteikuVisual() {
   const container = document.querySelector(".a-visuals");
   if (!container) return null;
 
@@ -40,5 +40,5 @@ class GreyCircle {
   return circle;
 }
 
-// only show visual when the song plays
+// Global function so audio logic can utilize it
 window.showZureteikuVisual = showZureteikuVisual;

@@ -68,19 +68,29 @@ function go() {
   }
 
   function updateVisualForCurrentSong() {
-    // clear first so we don't stack shapes
+    // Clear previous visuals
     clearVisual();
 
-    // Only show circle when Zureteiku is the selected song AND audio is playing
     const path = songSelect.value.toLowerCase();
+
     const isZureteiku =
       path.includes("zureteiku") ||
       path.includes("ずれていく") ||
       path.includes("zure");
 
-    if (isPlaying && isZureteiku) {
-      currentVisual = new GreyCircle(visualsContainer, 180, "#d9d9d9");
-      currentVisual.render();
+    const isUnknownMotherGoose = path.includes("umg");
+
+    // Only show visuals when the song is playing
+    if (!isPlaying) return;
+
+    // Zureteiku visual
+    if (isZureteiku && typeof window.showZureteikuVisual === "function") {
+      currentVisual = window.showZureteikuVisual();
+    }
+
+    // UNKNOWN MOTHER-GOOSE visual
+    if (isUnknownMotherGoose && typeof window.showHeartVisual === "function") {
+      currentVisual = window.showHeartVisual();
     }
   }
 
