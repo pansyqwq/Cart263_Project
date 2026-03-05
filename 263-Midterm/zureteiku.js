@@ -182,17 +182,17 @@ window.showZureteikuVisual = function () {
     // Dark background circles (bottom layer)
 
     circles.push(new FitCircle(container, refImg, {
-      u: 0.85,
-      v: 0.20,
-      size: 0.18,
+      u: 0.90,
+      v: 0.50,
+      size: 0.20,
       color: "#787878",
       z: -1
     }));
 
 
     circles.push(new FitCircle(container, refImg, {
-      u: 0.12,
-      v: 0.35,
+      u: 0.10,
+      v: 0.60,
       size: 0.18,
       color: "#787878",
       z: -1
@@ -204,7 +204,7 @@ window.showZureteikuVisual = function () {
     circles.push(new FitCircle(container, refImg, {
       u: 0.5,
       v: 0.5,
-      size: 0.14,
+      size: 0.16,
       color: "#d9d9d9",
       z: 10,
       dx: -20,
