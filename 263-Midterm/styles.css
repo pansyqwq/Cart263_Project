@@ -48,8 +48,14 @@ main {
 
 /* -- Visual Area for Audio Visual -- */
 .a-visuals {
+    position: relative; /* allows absolute children */
+    overflow: hidden; 
     flex: 1;
     width: 100%;
+}
+.visual-layer{
+  position: absolute;
+  inset: 0;                /* top:0 right:0 bottom:0 left:0 */
 }
 
 .song-info h2 {
