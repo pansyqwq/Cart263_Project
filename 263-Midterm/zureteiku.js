@@ -15,7 +15,7 @@ class GreyCircle {
 
     this.el.style.position = "absolute";
     this.el.style.width = this.size + "px";
-    this.el.style.height = this.size + "px";
+    this.el.style.height = this.size + "px";  
     this.el.style.background = this.color;
     this.el.style.borderRadius = "50%";
 
