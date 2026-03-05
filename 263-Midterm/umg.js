@@ -16,9 +16,9 @@ class HeartVisual {
     this.heart.style.fontSize = this.size + "px";
     this.heart.style.color = this.color;
 
-    // Centers the heart in window
+    // Centers the heart in window with a vertical offset
     this.heart.style.left = "50%";
-    this.heart.style.top = "50%";
+    this.heart.style.top = "40%";
     this.heart.style.transform = "translate(-50%, -50%)";
 
     // Changes the font to look more heart shaped
@@ -40,7 +40,7 @@ function showHeartVisual() {
   const container = document.querySelector(".a-visuals");
   if (!container) return null;
 
-  const heart = new HeartVisual(container, 150, "#706F6A");
+  const heart = new HeartVisual(container, 450, "#706F6A");
   heart.render();
   return heart;
 }
