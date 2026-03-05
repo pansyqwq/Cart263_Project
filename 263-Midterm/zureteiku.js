@@ -31,6 +31,7 @@ class GreyCircle {
   }
 }
 
+/* Global function so audio logic can utilize it */
 function showZureteikuVisual() {
   const container = document.querySelector(".a-visuals");
   if (!container) return null;
@@ -40,5 +41,5 @@ function showZureteikuVisual() {
   return circle;
 }
 
-// Global function so audio logic can utilize it
+// Displays visual within window
 window.showZureteikuVisual = showZureteikuVisual;

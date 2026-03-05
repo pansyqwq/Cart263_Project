@@ -36,6 +36,7 @@ class HeartVisual {
   }
 }
 
+/* Global function so audio logic can utilize it */
 function showHeartVisual() {
   const container = document.querySelector(".a-visuals");
   if (!container) return null;
@@ -45,5 +46,5 @@ function showHeartVisual() {
   return heart;
 }
 
-// Global function so audio logic can utilize it
+// Displays visual within window
 window.showHeartVisual = showHeartVisual;
