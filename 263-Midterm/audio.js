@@ -56,9 +56,13 @@ function go() {
       isUnknownMotherGoose &&
       typeof window.showHeartVisual === "function"
     ) {
+      // Set up the heart visual
       currentVisual = window.showHeartVisual();
-
       window.getAmplitude(currentSource, audioContext, 999999, currentVisual);
+
+      // Call the waveform visual directly
+      window.showWaveform(currentSource, audioContext, 999999, currentVisual);
+      addBackgroundRectangle();
     }
   }
 
