@@ -1,4 +1,3 @@
-// audio.js
 window.onload = go;
 
 function go() {
@@ -11,7 +10,7 @@ function go() {
   const visualsContainer = document.querySelector(".a-visuals");
   const pauseBtn = document.querySelector("#pause");
 
-  // safety check
+  // Safety check
   if (
     !playStopBtn ||
     !pauseBtn ||
@@ -48,7 +47,8 @@ function go() {
   }
 
   function updateVisualForCurrentSong() {
-    clearVisual(); // removes old visuals
+    // Removes old visuals
+    clearVisual();
 
     const path = songSelect.value.toLowerCase();
 
@@ -60,14 +60,14 @@ function go() {
     const isUnknownMotherGoose = path.includes("umg");
 
     // Only show visuals when music is actually playing
-    if (!isPlaying) return;
+    if (!isPlaying && !isUnknownMotherGoose) return;
 
     if (isZureteiku && typeof window.showZureteikuVisual === "function") {
       currentVisual = window.showZureteikuVisual();
     } else if (isUnknownMotherGoose) {
       // Check if UMG heart is already in DOM
       let umgHeart = document.querySelector("#umg-heart");
-
+      // If it's not, bring it back
       if (!umgHeart) {
         visualsContainer.innerHTML = `
         <svg id="umg-heart" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 427.31 438.41">
@@ -141,10 +141,10 @@ function go() {
         umgHeart = document.querySelector("#umg-heart");
       }
 
-      // Make it visible
+      // Make it visible by displaying it to block
       umgHeart.style.display = "block";
 
-      // Start the animation
+      // Starts the UMG animation
       startUMGAnimation();
 
       // Optionally store reference
@@ -205,19 +205,18 @@ function go() {
     pauseBtn.textContent = "⏸";
 
     stopVisualLoop();
-    clearVisual();
   }
 
   function startFromBuffer(loop = true) {
     if (!currentBuffer) return;
-
-    stopSource(); // stop old audio + visuals loop
+    // Stops old audio and loops visuals
+    stopSource();
 
     currentSource = audioContext.createBufferSource();
     currentSource.buffer = currentBuffer;
     currentSource.loop = loop;
 
-    //  audio goes into analyser so we can measure volume
+    // Audio goes into analyser so we can measure volume
     currentSource.connect(analyser);
 
     currentSource.start(0);
@@ -242,17 +241,18 @@ function go() {
   let rafId = null;
 
   function getVolume01() {
-    // Time-domain RMS volume (0..~1)
+    // Time-domain RMS volume
     analyser.getByteTimeDomainData(timeData);
 
     let sum = 0;
     for (let i = 0; i < timeData.length; i++) {
-      const v = (timeData[i] - 128) / 128; // -1..1
+      const v = (timeData[i] - 128) / 128;
       sum += v * v;
     }
 
-    const rms = Math.sqrt(sum / timeData.length); // 0..1
-    return Math.min(1, rms * 2.5); // boost sensitivity
+    const rms = Math.sqrt(sum / timeData.length);
+    // Boosts sensitivity
+    return Math.min(1, rms * 2.5);
   }
 
   function startVisualLoop() {
@@ -266,7 +266,7 @@ function go() {
 
       const vol = getVolume01();
 
-      // If visual supports update(vol, dt), call it
+      // If visual supports update, call it
       if (currentVisual && typeof currentVisual.update === "function") {
         currentVisual.update(vol, dt);
       }
@@ -284,18 +284,19 @@ function go() {
 
   /* ==================== UI EVENTS ==================== */
 
-  // 1) Load initial song buffer (no autoplay)
+  // Load initial song buffer (no autoplay)
   (async () => {
     try {
       currentBuffer = await loadBuffer(songSelect.value);
       playStopBtn.textContent = "▶";
       updateSongTitle();
+      updateVisualForCurrentSong();
     } catch (e) {
       console.error(e);
     }
   })();
 
-  // 2) Dropdown: load new song
+  // Dropdown: loads new song
   songSelect.addEventListener("change", async () => {
     updateSongTitle();
     const path = songSelect.value;
@@ -313,7 +314,7 @@ function go() {
     }
   });
 
-  // 3) Play/Stop
+  // Play/Stop
   playStopBtn.addEventListener("click", async () => {
     await ensureAudioRunning();
     if (!currentBuffer) return;
@@ -326,7 +327,7 @@ function go() {
     }
   });
 
-  // 4) Pause/Resume
+  // Pause/Resume
   pauseBtn.addEventListener("click", async () => {
     if (!currentSource) return;
 
@@ -337,7 +338,7 @@ function go() {
 
       pauseBtn.textContent = "▶";
       pauseBtn.classList.add("is-paused");
-      // stop animation updates while paused
+      // Stops animation updates while paused
       stopVisualLoop();
     } else {
       await audioContext.resume();
@@ -347,14 +348,22 @@ function go() {
       pauseBtn.textContent = "⏸";
       pauseBtn.classList.remove("is-paused");
 
-      // rebuild visual + restart loop
+      // Rebuild visual + restart loop
       updateVisualForCurrentSong();
       startVisualLoop();
     }
   });
 
-  // 5) Volume slider (controls gainNode)
+  // Volume slider (controls gainNode)
   volumeSlider.addEventListener("input", () => {
     gainNode.gain.value = Number(volumeSlider.value);
   });
 }
+
+// Opens Artist Statement when clicked
+const aStatement = document.querySelector("#statement");
+
+aStatement.addEventListener("click", () => {
+  // Opens the PDF in a new tab
+  window.open("cart263_midterm_artistStatement.pdf", "_blank");
+});

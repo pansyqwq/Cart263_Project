@@ -1,5 +1,3 @@
-// zureteiku.js
-
 function getContainRect(container, img) {
   const cw = container.clientWidth;
   const ch = container.clientHeight;
@@ -41,7 +39,7 @@ class FitCircle {
 
     this.label = label;
 
-    this.scale = 1; // current scale multiplier
+    this.scale = 1;
 
     this.el = document.createElement("div");
     this.el.style.position = "absolute";
@@ -51,7 +49,7 @@ class FitCircle {
     this.el.style.pointerEvents = "none";
     this.el.style.zIndex = String(this.z);
 
-    // Center children (for label text)
+    // Center children
     this.el.style.display = "flex";
     this.el.style.alignItems = "center";
     this.el.style.justifyContent = "center";
@@ -63,7 +61,6 @@ class FitCircle {
       text.textContent = this.label;
 
       text.style.color = "#787878";
-      // Use your @font-face name (recommended)
       text.style.fontFamily = "HelveticaOblique, Helvetica, Arial, sans-serif";
       text.style.fontWeight = "bold";
       text.style.fontSize = "clamp(10px, 2vmin, 22px)";
@@ -94,7 +91,7 @@ class FitCircle {
     this.el.style.left = cx - s / 2 + "px";
     this.el.style.top = cy - s / 2 + "px";
 
-    // Apply audio-driven scale (without breaking position math)
+    // Apply audio-driven scale
     this.el.style.transform = `scale(${this.scale})`;
     this.el.style.transformOrigin = "center";
   }
@@ -126,8 +123,8 @@ window.showZureteikuVisual = function () {
   let refImg = null;
   const imgs = [];
 
-  // Per-image drift state
-  const drift = []; // { img, phase, baseSpeed, ampBase }
+  // Per-image drift state (img, phase, baseSpeed, ampBase)
+  const drift = [];
 
   // Create layered images
   files.forEach((src, i) => {
@@ -152,14 +149,17 @@ window.showZureteikuVisual = function () {
     drift.push({
       img,
       phase: Math.random() * Math.PI * 2,
-      baseSpeed: 0.6 + Math.random() * 1.2 + i * 0.08, // each image different initial speed
-      ampBase: 3 + i * 1.5 + Math.random() * 2.5, // base movement in px
+      // Different intial speed for each image
+      baseSpeed: 0.6 + Math.random() * 1.2 + i * 0.08,
+      // Base movement in pixels
+      ampBase: 3 + i * 1.5 + Math.random() * 2.5,
     });
   });
 
   let circles = [];
-  let greyCircle = null; // reference to the top circle
-  let t = 0; // time accumulator for smooth pulsing
+  let greyCircle = null;
+  // Time accumulator
+  let t = 0;
 
   function buildCircles() {
     if (!refImg || !refImg.naturalWidth) return;
@@ -214,7 +214,7 @@ window.showZureteikuVisual = function () {
   window.addEventListener("resize", onResize);
 
   return {
-    // audio.js calls update(vol, dt)
+    // Audio.js calls update
     update(vol, dt) {
       // Drift images vertically based on volume
       for (const d of drift) {
@@ -227,16 +227,16 @@ window.showZureteikuVisual = function () {
         d.img.style.transform = `translateY(${y.toFixed(2)}px)`;
       }
 
-      // 2) Pulse the grey circle scale based on volume
+      // Pulse the grey circle scale based on volume
       t += dt;
 
-      // 8-second breathing wave: 0..1
+      // 8-second breathing wave
       const wave = (Math.sin((t * 2 * Math.PI) / 8) + 1) / 2;
 
-      // strength based on volume (quiet = small pulse, loud = bigger pulse)
+      // Strength based on volume
       const strength = Math.min(1, vol * 1.3);
 
-      // scale from 1.0 -> 1.1
+      // Scales from 1.0 to 1.1
       const scale = 1 + 0.1 * wave * strength;
 
       if (greyCircle) {

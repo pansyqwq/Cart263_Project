@@ -228,6 +228,8 @@
 
 // window.showWaveform = showWaveform;
 
+/* ==================== Shattered Heart Animation ==================== */
+/* This SVG animation was provided by Sabine */
 function startUMGAnimation() {
   let theta = 0;
   let theta_2 = 0;
