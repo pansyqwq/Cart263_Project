@@ -138,7 +138,7 @@ function go() {
                 </g>
             </svg>
       `;
-        umgHeart = document.querySelector("#umg-heart"); // now it exists
+        umgHeart = document.querySelector("#umg-heart");
       }
 
       // Make it visible

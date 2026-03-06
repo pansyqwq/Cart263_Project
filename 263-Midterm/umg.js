@@ -239,7 +239,7 @@ function startUMGAnimation() {
   function animate() {
     for (let p of document.querySelectorAll(".st2")) {
       let val = Math.sin(theta);
-      let v2 = mapRange(val, -1, 1, 0.9, 1);
+      let v2 = mapRange(val, -1, 1, 0, 1);
       p.style.transformOrigin = "center center";
       p.style.transform = `scale(${v2}, ${v2})`;
     }
