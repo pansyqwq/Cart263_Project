@@ -229,6 +229,34 @@
 // window.showWaveform = showWaveform;
 
 /* ==================== Shattered Heart Animation ==================== */
+
+const audio = document.getElementById("audio");
+
+const audioContext = new AudioContext();
+const source = audioContext.createMediaElementSource(audio);
+
+const analyser = audioContext.createAnalyser();
+analyser.fftSize = 256;
+
+source.connect(analyser);
+analyser.connect(audioContext.destination);
+
+const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+let audioLevel = 0;
+
+function updateAudio() {
+  analyser.getByteFrequencyData(dataArray);
+
+  let sum = 0;
+
+  for (let i = 0; i < dataArray.length; i++) {
+    sum += dataArray[i];
+  }
+
+  audioLevel = sum / dataArray.length / 255;
+}
+
 /* This SVG animation was provided by Sabine */
 function startUMGAnimation() {
   let theta = 0;
@@ -239,30 +267,33 @@ function startUMGAnimation() {
   window.requestAnimationFrame(animate);
 
   function animate() {
+    console.log(audioLevel);
+    updateAudio();
+    let audioScale = 1 + audioLevel * 1.5;
     for (let p of document.querySelectorAll(".st2")) {
       let val = Math.sin(theta);
-      let v2 = mapRange(val, -1, 1, 0, 1);
+      let v2 = mapRange(val, -1, 1, 0, 1) * audioScale;
       p.style.transformOrigin = "center center";
       p.style.transform = `scale(${v2}, ${v2})`;
     }
 
     for (let p of document.querySelectorAll(".st3")) {
       let val = Math.sin(theta_2);
-      let v2 = mapRange(val, -1, 1, 0, 1);
+      let v2 = mapRange(val, -1, 1, 0, 1) * audioScale;
       p.style.transformOrigin = "center center";
       p.style.transform = `scale(${v2}, ${v2})`;
     }
 
     for (let p of document.querySelectorAll(".st1")) {
       let val = Math.sin(theta_3);
-      let v2 = mapRange(val, -1, 1, 0, 1);
+      let v2 = mapRange(val, -1, 1, 0, 1) * audioScale;
       p.style.transformOrigin = "center center";
       p.style.transform = `scale(${v2}, ${v2})`;
     }
 
     for (let p of document.querySelectorAll(".st0")) {
       let val = Math.sin(theta_4);
-      let v2 = mapRange(val, -1, 1, 0, 1);
+      let v2 = mapRange(val, -1, 1, 0, 1) * audioScale;
       p.style.transformOrigin = "center center";
       p.style.transform = `scale(${v2}, ${v2})`;
     }

@@ -145,10 +145,7 @@ function go() {
       umgHeart.style.display = "block";
 
       // Starts the UMG animation
-      startUMGAnimation();
-
-      // Optionally store reference
-      currentVisual = umgHeart;
+      currentVisual = startUMGAnimation();
     }
   }
 
