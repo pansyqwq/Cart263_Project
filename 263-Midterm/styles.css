@@ -89,16 +89,27 @@ main {
 
 /* -- Visual Area for Audio Visual -- */
 .a-visuals {
-    position: relative; /* allows absolute children */
+    position: relative;
     overflow: hidden; 
     flex: 1;
+    align-items: center;
     width: 100%;
-    height: 300px;
+    height: 100%;
+}
+
+.a-visuals svg {
+    width: 20vw;
+    height: auto;
 }
 
 #umg-heart {
     display: none;
-    transform: scale(0.1);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(1);
+        width: 20vw;
+        height: auto;
 }
 
 #umg-heart path {
