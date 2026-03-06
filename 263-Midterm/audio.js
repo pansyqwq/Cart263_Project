@@ -145,7 +145,7 @@ function go() {
       umgHeart.style.display = "block";
 
       // Starts the UMG animation
-      currentVisual = startUMGAnimation();
+      currentVisual = goUMG(analyser);
     }
   }
 

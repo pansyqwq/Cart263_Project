@@ -122,12 +122,12 @@ main {
 
 #umg-heart {
     display: none;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) scale(1);
-        width: 20vw;
-        height: auto;
+    position: absolute;
+    top: 10%;
+    left: 40%;
+    transform: translate(-50%, -50%) scale(1);
+    width: 20vw;
+    height: auto;
 }
 
 #umg-heart path {
