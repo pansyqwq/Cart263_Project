@@ -1,7 +1,16 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+const canvas = document.querySelector('#three-ex');
+const songSelect = document.querySelector('#songSelect');
 
+let sceneStarted = false;
+
+function initNingyouScene() {
+  if (sceneStarted) return;
+  sceneStarted = true;
+
+  canvas.style.display = 'block';
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
 
 const lightGray = new THREE.MeshBasicMaterial({ color: 0xcfcfcf });
@@ -53,8 +62,6 @@ const sizes = {
   height: window.innerHeight
 };
 
-// canvas
-const canvas = document.querySelector('#three-ex');
 
 // camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
@@ -76,3 +83,25 @@ function animate() {
   requestAnimationFrame(animate);
 }
 animate();
+
+  window.addEventListener('resize', () => {
+    sizes.width = window.innerWidth;
+    sizes.height = window.innerHeight;
+
+    camera.aspect = sizes.width / sizes.height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(sizes.width, sizes.height);
+  });
+}
+
+function checkSong() {
+  if (songSelect.value === 'sounds/TsumikinoNingyou.mp3') {
+    canvas.style.display = 'block';
+    initNingyouScene();
+  } else {
+    canvas.style.display = 'none';
+  }
+}
+
+checkSong();
+songSelect.addEventListener('change', checkSong);
