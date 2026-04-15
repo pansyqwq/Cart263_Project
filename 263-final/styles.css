@@ -238,3 +238,10 @@ main {
   width: 140px;
 }
 
+/* size for three ex canvas */
+#three-ex {
+  width: 300px;
+  height: 300px;
+  display: block;
+  margin: 0 auto;
+}

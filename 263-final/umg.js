@@ -1,22 +1,8 @@
+let umgAnimationId = null;
+
 // Passes the analyser for the audio in the other script
 function goUMG(analyser) {
   const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-  startUMGAnimation();
-
-  function updateAudio() {
-    analyser.getByteTimeDomainData(dataArray);
-
-    let sum = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-      const v = (dataArray[i] - 128) / 128;
-      sum += v * v;
-    }
-
-    const rms = Math.sqrt(sum / dataArray.length);
-    // Boosts sensitivity
-    return Math.min(1, rms * 2.5);
-  }
 
   // Calculates and returns RMS value for amplitude
   function updateAudio() {
@@ -29,7 +15,7 @@ function goUMG(analyser) {
     }
 
     const rms = Math.sqrt(sum / dataArray.length);
-    return rms;
+    return Math.min(1, rms * 2.5);
   }
 
   /* This SVG animation was provided by Sabine */
@@ -74,9 +60,47 @@ function goUMG(analyser) {
         p.style.transform = `scale(${s0})`;
       }
 
-      requestAnimationFrame(animate);
+      umgAnimationId = requestAnimationFrame(animate);
     }
 
     animate();
   }
+
+   function remove() {
+    if (umgAnimationId !== null) {
+      cancelAnimationFrame(umgAnimationId);
+      umgAnimationId = null;
+    }
+
+    const svg = document.getElementById("umg-heart");
+    if (svg) {
+      svg.remove();
+    }
+  }
+
+    const svg = document.getElementById("umg-heart");
+    if (svg) svg.style.transform = "scale(1)";
+
+    for (let p of document.querySelectorAll(".st0")) {
+      p.style.transform = "scale(1)";
+    }
+
+    for (let p of document.querySelectorAll(".st1")) {
+      p.style.transform = "scale(1)";
+    }
+
+    for (let p of document.querySelectorAll(".st2")) {
+      p.style.transform = "scale(1)";
+    }
+
+    for (let p of document.querySelectorAll(".st3")) {
+      p.style.transform = "scale(1)";
+    }
+  }
+
+  startUMGAnimation();
+
+  return {
+    remove
+  };
 }

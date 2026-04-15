@@ -61,7 +61,7 @@ function go() {
     const isUnknownMotherGoose = path.includes("umg");
 
     // Only show visuals when music is actually playing
-    if (!isPlaying && !isUnknownMotherGoose) return;
+   if (!isPlaying) return;
 
     if (isZureteiku && typeof window.showZureteikuVisual === "function") {
       currentVisual = window.showZureteikuVisual();
@@ -188,7 +188,7 @@ function go() {
     return await audioContext.decodeAudioData(arr);
   }
 
-  function stopSource() {
+   function stopSource() {
     if (currentSource) {
       try {
         currentSource.stop();
@@ -203,6 +203,7 @@ function go() {
     pauseBtn.textContent = "⏸";
 
     stopVisualLoop();
+    clearVisual();
   }
 
   function startFromBuffer(loop = true) {
