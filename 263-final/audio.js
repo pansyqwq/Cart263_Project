@@ -1,5 +1,6 @@
 window.onload = go;
 
+
 function go() {
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 

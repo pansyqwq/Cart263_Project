@@ -7,6 +7,15 @@
     <title>Wowaka: Audio Visual</title>
     <link rel="stylesheet" href="styles.css" />
 
+    <script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
+  }
+}
+</script>
+
 </head>
 
 <body>
@@ -116,10 +125,14 @@
             <h1 class="artist">WOWAKA</h1>
         </div>
     </main>
+
+    <canvas id="three-ex"></canvas>
     <script src="zureteiku.js"></script>
     <script src="audio.js"></script>
     <script src="umg.js"></script>
-    <script src="Ningyou.js"></script>
+    <script type="module" src="Ningyou.js"></script>
+
+
 </body>
 
 </html>
