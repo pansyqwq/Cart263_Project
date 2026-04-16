@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 let renderer = null;
 let camera = null;
@@ -7,6 +8,7 @@ let controls = null;
 let sceneRef = null;
 let animationId = null;
 let resizeHandler = null;
+let modelRoot = null;
 
 function getCanvas() {
     return document.querySelector('#three-ex');
@@ -36,6 +38,33 @@ function stopNingyouScene() {
     }
 
     camera = null;
+    // Remove and dispose any loaded GLTF model
+    if (modelRoot && sceneRef) {
+        try {
+            sceneRef.remove(modelRoot);
+        } catch (e) {}
+
+        // Dispose geometries and materials
+        modelRoot.traverse((node) => {
+            if (node.isMesh) {
+                if (node.geometry) node.geometry.dispose();
+                if (node.material) {
+                    const m = node.material;
+                    if (Array.isArray(m)) {
+                        m.forEach((mat) => {
+                            if (mat.map) mat.map.dispose();
+                            mat.dispose();
+                        });
+                    } else {
+                        if (m.map) m.map.dispose();
+                        m.dispose();
+                    }
+                }
+            }
+        });
+
+        modelRoot = null;
+    }
     sceneRef = null;
 
     if (canvas) {
@@ -73,10 +102,55 @@ function initNingyouScene() {
     const grayGroup = new THREE.Group();
     scene.add(grayGroup);
 
+    // Load external GLTF model and place it behind the block geometry.
+    try {
+        const loader = new GLTFLoader();
+        loader.load(
+            'models/cubes.glb',
+            (gltf) => {
+                modelRoot = gltf.scene || gltf.scenes[0];
+                if (!modelRoot) return;
+
+                // Position the model slightly behind the blocks (lower z)
+                modelRoot.position.set(0, -1.0, -2.5);
+                // Apply a conservative scale so the model fits the scene
+                modelRoot.scale.set(1.0, 1.0, 1.0);
+                modelRoot.traverse((n) => {
+                    if (n.isMesh) {
+                        n.receiveShadow = true;
+                        // Ensure GLB meshes render behind the procedural blocks
+                        n.renderOrder = 0;
+                        if (n.material) {
+                            n.material.depthTest = true;
+                            n.material.depthWrite = true;
+                        }
+                    }
+                });
+
+                // Insert the model as a background element
+                scene.add(modelRoot);
+                // Ensure it renders behind the grayGroup by moving it to the back
+                scene.children.unshift(scene.children.pop());
+            },
+            undefined,
+            (err) => {
+                console.warn('Failed to load models/cubes.glb', err);
+            }
+        );
+    } catch (e) {
+        console.warn('GLTFLoader not available or failed to load model', e);
+    }
+
     for (const b of blocks) {
         const mesh = new THREE.Mesh(boxGeometry, b.mat);
         mesh.position.set(b.x, b.y, b.z);
         mesh.scale.set(b.w, b.h, b.d);
+        // Make procedural blocks render above the loaded GLB
+        mesh.renderOrder = 1;
+        if (mesh.material) {
+            mesh.material.depthTest = true;
+            mesh.material.depthWrite = true;
+        }
         grayGroup.add(mesh);
     }
 
