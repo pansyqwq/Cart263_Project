@@ -169,57 +169,8 @@ function initTosenboScene() {
   directionalLight.position.set(5, 5, 5);
   scene.add(directionalLight);
 
-  // Animation loop using rubik-style flips around the model's center
-  let lastRenderTime = performance.now();
-  let flipTimer = 0;
-  const flipInterval = 2.4;
-  const flipDuration = 0.4;
-  let isFlipping = false;
-  let flipStartTime = 0;
-  const startQuat = new THREE.Quaternion();
-  const targetQuat = new THREE.Quaternion();
-  const flipAxes = [new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 1)];
-
-  const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
-
-  function beginFlip() {
-    if (!modelPivot) return;
-    isFlipping = true;
-    flipStartTime = performance.now();
-    startQuat.copy(modelPivot.quaternion);
-
-    const axis = flipAxes[Math.random() > 0.5 ? 1 : 0];
-    const direction = Math.random() > 0.5 ? 1 : -1;
-    const flipQuat = new THREE.Quaternion().setFromAxisAngle(
-      axis,
-      (Math.PI / 2) * direction,
-    );
-    targetQuat.copy(startQuat).multiply(flipQuat);
-  }
-
+  // Animation loop without rotation
   function animate() {
-    const currentTime = performance.now();
-    const dt = Math.min((currentTime - lastRenderTime) / 1000, 0.033);
-    lastRenderTime = currentTime;
-
-    if (modelPivot) {
-      if (!isFlipping) {
-        flipTimer += dt;
-        if (flipTimer >= flipInterval) {
-          flipTimer = 0;
-          beginFlip();
-        }
-      } else {
-        const elapsed = (currentTime - flipStartTime) / 1000;
-        const t = Math.min(elapsed / flipDuration, 1);
-        const eased = easeInOutQuad(t);
-        modelPivot.quaternion.copy(startQuat.clone().slerp(targetQuat, eased));
-        if (t >= 1) {
-          isFlipping = false;
-        }
-      }
-    }
-
     renderer.render(scene, camera);
     animationId = requestAnimationFrame(animate);
   }

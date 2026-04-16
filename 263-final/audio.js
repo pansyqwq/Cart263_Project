@@ -52,7 +52,6 @@ function go() {
   const analyser = audioContext.createAnalyser();
   analyser.fftSize = 1024;
   const timeData = new Uint8Array(analyser.fftSize);
-
   analyser.connect(gainNode);
   gainNode.connect(audioContext.destination);
 
