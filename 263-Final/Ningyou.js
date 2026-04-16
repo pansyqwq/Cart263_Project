@@ -1,16 +1,54 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const canvas = document.querySelector('#three-ex');
-const songSelect = document.querySelector('#songSelect');
+let renderer = null;
+let camera = null;
+let controls = null;
+let sceneRef = null;
+let animationId = null;
+let resizeHandler = null;
 
-let sceneStarted = false;
+function getCanvas() {
+    return document.querySelector('#three-ex');
+}
+
+function stopNingyouScene() {
+    const canvas = getCanvas();
+
+    if (animationId !== null) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+
+    if (controls) {
+        controls.dispose();
+        controls = null;
+    }
+
+    if (renderer) {
+        renderer.dispose();
+        renderer = null;
+    }
+
+    if (resizeHandler) {
+        window.removeEventListener('resize', resizeHandler);
+        resizeHandler = null;
+    }
+
+    camera = null;
+    sceneRef = null;
+
+    if (canvas) {
+        canvas.style.display = 'none';
+    }
+}
 
 function initNingyouScene() {
-    if (sceneStarted) return;
-    sceneStarted = true;
+    const canvas = getCanvas();
+    if (!canvas) return;
 
-    canvas.style.display = 'block';
+    stopNingyouScene();
+
     const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
 
     const lightGray = new THREE.MeshBasicMaterial({ color: 0xcfcfcf });
@@ -26,29 +64,22 @@ function initNingyouScene() {
         { x: 2.2, y: 2.0, z: 0, w: 1.3, h: 3.5, d: 1.0, mat: darkGray },
         { x: 2.8, y: -1.7, z: 0, w: 3.3, h: 1.2, d: 1.0, mat: darkGray },
         { x: -0.8, y: -2.3, z: 0, w: 3.0, h: 1.0, d: 1.0, mat: midGray },
-        //these are all cubes 
     ];
 
-    //SCENE
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xe9e9e9);
+    sceneRef = scene;
 
-    //Group
     const grayGroup = new THREE.Group();
     scene.add(grayGroup);
 
     for (const b of blocks) {
-        //Take each item inside blocks, one by one, and call it b
-        //for every block description, create a block
         const mesh = new THREE.Mesh(boxGeometry, b.mat);
-
         mesh.position.set(b.x, b.y, b.z);
         mesh.scale.set(b.w, b.h, b.d);
-
         grayGroup.add(mesh);
     }
 
-    // RED SPHERE
     const redSphere = new THREE.Mesh(
         new THREE.SphereGeometry(0.7, 32, 32),
         redMat
@@ -56,53 +87,59 @@ function initNingyouScene() {
     redSphere.position.set(-1.5, 0.5, 0.8);
     scene.add(redSphere);
 
-    // SIZES
     const sizes = {
-        width: window.innerWidth,
-        height: window.innerHeight
+        width: canvas.clientWidth || 300,
+        height: canvas.clientHeight || 300
     };
 
-
-    // camera
-    const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
+    camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
     camera.position.set(0, 0, 18);
     scene.add(camera);
 
-    // renderer
-    const renderer = new THREE.WebGLRenderer({ canvas });
-    renderer.setSize(sizes.width, sizes.height);
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(sizes.width, sizes.height, false);
 
-    // controls
-    const controls = new OrbitControls(camera, canvas);
+    controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
 
-    // ANIMATE
     function animate() {
         controls.update();
         renderer.render(scene, camera);
-        requestAnimationFrame(animate);
+        animationId = requestAnimationFrame(animate);
     }
+
     animate();
 
-    window.addEventListener('resize', () => {
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
+    resizeHandler = () => {
+        const width = canvas.clientWidth || 300;
+        const height = canvas.clientHeight || 300;
+
+        if (!camera || !renderer) return;
 
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
+        renderer.setSize(width, height, false);
+    };
 
-        renderer.setSize(width, height);
-    });
+    window.addEventListener('resize', resizeHandler);
 }
 
-function checkSong() {
-    if (songSelect.value === 'sounds/TsumikinoNingyou.mp3') {
-        canvas.style.display = 'block';
-        initNingyouScene();
-    } else {
-        canvas.style.display = 'none';
+window.showNingyouVisual = function () {
+    const canvas = getCanvas();
+
+    if (!canvas) {
+        console.error('#three-ex still not found in showNingyouVisual');
+        return {
+            remove() {}
+        };
     }
-}
 
-checkSong();
-songSelect.addEventListener('change', checkSong);
+    canvas.style.display = 'block';
+    initNingyouScene();
+
+    return {
+        remove() {
+            stopNingyouScene();
+        }
+    };
+};

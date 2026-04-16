@@ -5,13 +5,16 @@ function goUMG(analyser) {
   const dataArray = new Uint8Array(analyser.frequencyBinCount);
   const svg = document.getElementById("umg-heart");
 
+  if (umgAnimationId !== null) {
+    cancelAnimationFrame(umgAnimationId);
+    umgAnimationId = null;
+  }
+
   if (!svg) {
     return {
       remove() {}
     };
   }
-
-  svg.style.display = "block";
 
   // Calculates and returns RMS value for amplitude
   function updateAudio() {
@@ -41,6 +44,8 @@ function goUMG(analyser) {
   function startUMGAnimation() {
     const mapRange = (value, oldMin, oldMax, newMin, newMax) =>
       ((value - oldMin) / (oldMax - oldMin)) * (newMax - newMin) + newMin;
+
+    svg.style.display = "block";
 
     function animate() {
       let audioLevel = updateAudio();
@@ -81,6 +86,7 @@ function goUMG(analyser) {
     resetUMG();
   }
 
+  resetUMG();
   startUMGAnimation();
 
   return {

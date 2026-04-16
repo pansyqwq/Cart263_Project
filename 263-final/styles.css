@@ -123,8 +123,8 @@ main {
 #umg-heart {
     display: none;
     position: absolute;
-    top: 10%;
-    left: 40%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%) scale(1);
     width: 20vw;
     height: auto;
@@ -240,8 +240,11 @@ main {
 
 /* size for three ex canvas */
 #three-ex {
-  width: 300px;
-  height: 300px;
-  display: block;
-  margin: 0 auto;
+   display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    width: 20vw;
+    height: auto;
 }

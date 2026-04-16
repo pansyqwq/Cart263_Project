@@ -1,4 +1,4 @@
-window.onload = go;
+window.addEventListener("DOMContentLoaded", go);
 
 function go() {
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -10,7 +10,6 @@ function go() {
   const visualsContainer = document.querySelector(".a-visuals");
   const pauseBtn = document.querySelector("#pause");
 
-  // Safety check
   if (
     !playStopBtn ||
     !pauseBtn ||
@@ -19,7 +18,7 @@ function go() {
     !visualsContainer
   ) {
     console.error(
-      "Missing UI element(s). Check IDs: #playStop #pause #volumeSlider #songSelect and .a-visuals",
+      "Missing UI element(s). Check IDs: #playStop #pause #volumeSlider #songSelect and .a-visuals"
     );
     return;
   }
@@ -28,15 +27,18 @@ function go() {
   const popup = document.querySelector(".about-popup");
   const closeBtn = document.querySelector(".close-popup");
 
-  aboutBtn.addEventListener("click", () => {
-    popup.style.display = "flex";
-  });
+  if (aboutBtn && popup) {
+    aboutBtn.addEventListener("click", () => {
+      popup.style.display = "flex";
+    });
+  }
 
-  closeBtn.addEventListener("click", () => {
-    popup.style.display = "none";
-  });
+  if (closeBtn && popup) {
+    closeBtn.addEventListener("click", () => {
+      popup.style.display = "none";
+    });
+  }
 
-  /* ==================== VISUALS ==================== */
   let currentVisual = null;
 
   function hideAllVisuals() {
@@ -67,43 +69,64 @@ function go() {
   }
 
   function updateVisualForCurrentSong() {
-    // Removes old visuals
+    console.log("updateVisualForCurrentSong called");
     clearVisual();
 
     const path = songSelect.value.toLowerCase();
+    console.log("current song path:", path);
 
     const isZureteiku =
       path.includes("zureteiku") ||
       path.includes("ずれていく") ||
       path.includes("zure");
 
-    const isUnknownMotherGoose = path.includes("umg");
+    const isUnknownMotherGoose =
+      path.includes("umg") ||
+      path.includes("unknownmothergoose") ||
+      path.includes("unknown-mother-goose");
+
     const isNingyou =
       path.includes("tsumikinoningyou") ||
       path.includes("tsumiki") ||
       path.includes("ningyou");
 
-    // Only show visuals when music is actually playing
-    if (!isPlaying) return;
+    console.log("isPlaying:", isPlaying);
+    console.log("isZureteiku:", isZureteiku);
+    console.log("isUnknownMotherGoose:", isUnknownMotherGoose);
+    console.log("isNingyou:", isNingyou);
+
+    if (!isPlaying) {
+      console.log("Visual not started because audio is not playing");
+      return;
+    }
+
+    visualsContainer.style.display = "block";
 
     if (isZureteiku && typeof window.showZureteikuVisual === "function") {
+      console.log("Starting Zureteiku visual");
       currentVisual = window.showZureteikuVisual();
+      console.log("showZureteikuVisual returned:", currentVisual);
     } else if (isUnknownMotherGoose) {
-      // Check if UMG heart is already in DOM
-      let umgHeart = document.querySelector("#umg-heart");
+      console.log("Starting UMG visual");
 
-      // Make it visible by displaying it to block
-      if (umgHeart) {
-        umgHeart.style.display = "block";
+      if (typeof goUMG === "function") {
+        currentVisual = goUMG(analyser);
+        console.log("goUMG returned:", currentVisual);
+      } else {
+        console.error("goUMG is not available");
       }
-
-      // Starts the UMG animation
-      currentVisual = goUMG(analyser);
     } else if (isNingyou) {
-      const threeCanvas = document.querySelector("#three-ex");
-      if (threeCanvas) {
-        threeCanvas.style.display = "block";
+      console.log("Starting Ningyou visual");
+
+      if (typeof window.showNingyouVisual === "function") {
+        currentVisual = window.showNingyouVisual();
+        console.log("showNingyouVisual returned:", currentVisual);
+      } else {
+        console.error("showNingyouVisual is not available");
       }
+    } else {
+      console.log("No matching visual for this song");
+      currentVisual = null;
     }
   }
 
@@ -113,68 +136,68 @@ function go() {
     }
   }
 
-  // If window resizes, rebuild the visual (your visual already handles scaling)
-  window.addEventListener("resize", () => {
-    if (currentVisual && isPlaying) updateVisualForCurrentSong();
-  });
-
-  /* ==================== AUDIO ==================== */
   let currentBuffer = null;
   let currentSource = null;
   let isPlaying = false;
   let isPaused = false;
 
-  // GainNode for volume slider
   const gainNode = audioContext.createGain();
   gainNode.gain.value = Number(volumeSlider.value);
 
-  // AnalyserNode for volume detection
   const analyser = audioContext.createAnalyser();
   analyser.fftSize = 1024;
   const timeData = new Uint8Array(analyser.fftSize);
 
-  // Connect final chain: analyser -> gain -> speakers
   analyser.connect(gainNode);
   gainNode.connect(audioContext.destination);
 
   async function loadBuffer(filePath) {
     const res = await fetch(filePath);
-    if (!res.ok)
+    if (!res.ok) {
       throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+    }
     const arr = await res.arrayBuffer();
     return await audioContext.decodeAudioData(arr);
   }
 
+  function stopVisualLoop() {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+    }
+    rafId = null;
+  }
+
   function stopSource() {
+    stopVisualLoop();
+
     if (currentSource) {
       try {
         currentSource.stop();
       } catch (e) {}
+
       try {
         currentSource.disconnect();
       } catch (e) {}
+
       currentSource = null;
     }
+
+    clearVisual();
+
     isPlaying = false;
     isPaused = false;
     pauseBtn.textContent = "⏸";
-
-    stopVisualLoop();
-    clearVisual();
   }
 
   function startFromBuffer(loop = true) {
     if (!currentBuffer) return;
-    // Stops old audio and loops visuals
+
     stopSource();
 
     currentSource = audioContext.createBufferSource();
     currentSource.buffer = currentBuffer;
     currentSource.loop = loop;
-
-    // Audio goes into analyser so we can measure volume
     currentSource.connect(analyser);
-
     currentSource.start(0);
 
     isPlaying = true;
@@ -193,11 +216,9 @@ function go() {
     }
   }
 
-  /* ==================== requestAnimationFrame ==================== */
   let rafId = null;
 
   function getVolume01() {
-    // Time-domain RMS volume
     analyser.getByteTimeDomainData(timeData);
 
     let sum = 0;
@@ -207,7 +228,6 @@ function go() {
     }
 
     const rms = Math.sqrt(sum / timeData.length);
-    // Boosts sensitivity
     return Math.min(1, rms * 2.5);
   }
 
@@ -222,7 +242,6 @@ function go() {
 
       const vol = getVolume01();
 
-      // If visual supports update, call it
       if (currentVisual && typeof currentVisual.update === "function") {
         currentVisual.update(vol, dt);
       }
@@ -233,27 +252,23 @@ function go() {
     rafId = requestAnimationFrame(tick);
   }
 
-  function stopVisualLoop() {
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = null;
-  }
+  window.addEventListener("resize", () => {
+    if (currentVisual && isPlaying) {
+      updateVisualForCurrentSong();
+    }
+  });
 
-  /* ==================== UI EVENTS ==================== */
-
-  // Load initial song buffer (no autoplay)
   (async () => {
     try {
       currentBuffer = await loadBuffer(songSelect.value);
       playStopBtn.textContent = "▶";
       updateSongTitle();
-      updateVisualForCurrentSong();
       hideAllVisuals();
     } catch (e) {
       console.error(e);
     }
   })();
 
-  // Dropdown: loads new song
   songSelect.addEventListener("change", async () => {
     updateSongTitle();
     const path = songSelect.value;
@@ -271,7 +286,6 @@ function go() {
     }
   });
 
-  // Play/Stop
   playStopBtn.addEventListener("click", async () => {
     await ensureAudioRunning();
     if (!currentBuffer) return;
@@ -284,7 +298,6 @@ function go() {
     }
   });
 
-  // Pause/Resume
   pauseBtn.addEventListener("click", async () => {
     if (!currentSource) return;
 
@@ -295,7 +308,6 @@ function go() {
 
       pauseBtn.textContent = "▶";
       pauseBtn.classList.add("is-paused");
-      // Stops animation updates while paused
       stopVisualLoop();
     } else {
       await audioContext.resume();
@@ -305,22 +317,20 @@ function go() {
       pauseBtn.textContent = "⏸";
       pauseBtn.classList.remove("is-paused");
 
-      // Rebuild visual + restart loop
       updateVisualForCurrentSong();
       startVisualLoop();
     }
   });
 
-  // Volume slider (controls gainNode)
   volumeSlider.addEventListener("input", () => {
     gainNode.gain.value = Number(volumeSlider.value);
   });
 }
 
-// Opens Artist Statement when clicked
 const aStatement = document.querySelector("#statement");
 
-aStatement.addEventListener("click", () => {
-  // Opens the PDF in a new tab
-  window.open("cart263_midterm_artistStatement.pdf", "_blank");
-});
+if (aStatement) {
+  aStatement.addEventListener("click", () => {
+    window.open("cart263_midterm_artistStatement.pdf", "_blank");
+  });
+}
