@@ -40,24 +40,76 @@ function go() {
   }
 
   let currentVisual = null;
+  let rafId = null;
+  let currentBuffer = null;
+  let currentSource = null;
+  let isPlaying = false;
+  let isPaused = false;
+
+  const gainNode = audioContext.createGain();
+  gainNode.gain.value = Number(volumeSlider.value);
+
+  const analyser = audioContext.createAnalyser();
+  analyser.fftSize = 1024;
+  const timeData = new Uint8Array(analyser.fftSize);
+
+  analyser.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  function getUMGHeart() {
+    return document.querySelector("#umg-heart");
+  }
+
+  function getThreeCanvas() {
+    return document.querySelector("#three-ex");
+  }
+
+  function resetUMGHeart() {
+    const umgHeart = getUMGHeart();
+    if (!umgHeart) return;
+
+    umgHeart.style.display = "block";
+    umgHeart.style.opacity = "1";
+    umgHeart.style.visibility = "visible";
+    umgHeart.style.transform = "scale(1)";
+    umgHeart.style.pointerEvents = "none";
+
+    for (const p of umgHeart.querySelectorAll(".st0, .st1, .st2, .st3")) {
+      p.style.transform = "scale(1)";
+      p.style.transformOrigin = "center center";
+      p.style.opacity = "1";
+      p.style.visibility = "visible";
+    }
+  }
 
   function hideAllVisuals() {
-    const umgHeart = document.querySelector("#umg-heart");
-    const threeCanvas = document.querySelector("#three-ex");
+    const umgHeart = getUMGHeart();
+    const threeCanvas = getThreeCanvas();
 
     if (umgHeart) {
       umgHeart.style.display = "none";
-      umgHeart.style.transform = "translate(-50%, -50%) scale(1)";
+      umgHeart.style.opacity = "1";
+      umgHeart.style.visibility = "visible";
+      umgHeart.style.transform = "scale(1)";
 
-      for (let p of umgHeart.querySelectorAll(".st0, .st1, .st2, .st3")) {
+      for (const p of umgHeart.querySelectorAll(".st0, .st1, .st2, .st3")) {
         p.style.transform = "scale(1)";
         p.style.transformOrigin = "center center";
+        p.style.opacity = "1";
+        p.style.visibility = "visible";
       }
     }
 
     if (threeCanvas) {
       threeCanvas.style.display = "none";
     }
+  }
+
+  function stopVisualLoop() {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+    }
+    rafId = null;
   }
 
   function clearVisual() {
@@ -109,6 +161,21 @@ function go() {
     } else if (isUnknownMotherGoose) {
       console.log("Starting UMG visual");
 
+      const threeCanvas = getThreeCanvas();
+      if (threeCanvas) {
+        threeCanvas.style.display = "none";
+      }
+
+      const umgHeart = getUMGHeart();
+      if (umgHeart) {
+        resetUMGHeart();
+        console.log("UMG heart display:", getComputedStyle(umgHeart).display);
+        console.log("UMG heart opacity:", getComputedStyle(umgHeart).opacity);
+        console.log("UMG heart visibility:", getComputedStyle(umgHeart).visibility);
+      } else {
+        console.error("#umg-heart not found");
+      }
+
       if (typeof goUMG === "function") {
         currentVisual = goUMG(analyser);
         console.log("goUMG returned:", currentVisual);
@@ -117,6 +184,11 @@ function go() {
       }
     } else if (isNingyou) {
       console.log("Starting Ningyou visual");
+
+      const umgHeart = getUMGHeart();
+      if (umgHeart) {
+        umgHeart.style.display = "none";
+      }
 
       if (typeof window.showNingyouVisual === "function") {
         currentVisual = window.showNingyouVisual();
@@ -136,21 +208,6 @@ function go() {
     }
   }
 
-  let currentBuffer = null;
-  let currentSource = null;
-  let isPlaying = false;
-  let isPaused = false;
-
-  const gainNode = audioContext.createGain();
-  gainNode.gain.value = Number(volumeSlider.value);
-
-  const analyser = audioContext.createAnalyser();
-  analyser.fftSize = 1024;
-  const timeData = new Uint8Array(analyser.fftSize);
-
-  analyser.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-
   async function loadBuffer(filePath) {
     const res = await fetch(filePath);
     if (!res.ok) {
@@ -158,13 +215,6 @@ function go() {
     }
     const arr = await res.arrayBuffer();
     return await audioContext.decodeAudioData(arr);
-  }
-
-  function stopVisualLoop() {
-    if (rafId) {
-      cancelAnimationFrame(rafId);
-    }
-    rafId = null;
   }
 
   function stopSource() {
@@ -215,8 +265,6 @@ function go() {
       await audioContext.resume();
     }
   }
-
-  let rafId = null;
 
   function getVolume01() {
     analyser.getByteTimeDomainData(timeData);
