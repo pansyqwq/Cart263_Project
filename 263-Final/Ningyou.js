@@ -87,9 +87,11 @@ function initNingyouScene() {
     redSphere.position.set(-1.5, 0.5, 0.8);
     scene.add(redSphere);
 
+    /
+    const container = canvas.parentElement || document.body;
     const sizes = {
-        width: canvas.clientWidth || 300,
-        height: canvas.clientHeight || 300
+        width: canvas.clientWidth || container.clientWidth || 300,
+        height: canvas.clientHeight || container.clientHeight || 300,
     };
 
     camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
@@ -97,7 +99,13 @@ function initNingyouScene() {
     scene.add(camera);
 
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    renderer.setSize(sizes.width, sizes.height, false);
+    // Use device pixel ratio for crisper rendering and update the canvas style
+    // so the displayed size matches the drawing buffer.
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(sizes.width, sizes.height, true);
+    canvas.style.width = sizes.width + 'px';
+    canvas.style.height = sizes.height + 'px';
+    canvas.style.display = 'block';
 
     controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
@@ -134,7 +142,15 @@ window.showNingyouVisual = function () {
         };
     }
 
+    // Ensure the canvas is visible and placed correctly.
     canvas.style.display = 'block';
+    canvas.style.position = 'absolute';
+    canvas.style.top = '50%';
+    canvas.style.left = '50%';
+    canvas.style.transform = 'translate(-50%, -50%) scale(1)';
+    canvas.style.pointerEvents = 'none';
+
+    console.debug('showNingyouVisual called, canvas client size:', canvas.clientWidth, canvas.clientHeight);
     initNingyouScene();
 
     return {

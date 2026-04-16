@@ -151,8 +151,7 @@ window.showZureteikuVisual = function () {
     img.style.display = "block";
     img.style.willChange = "transform";
 
-  // Append images into our dedicated layer so they can be removed
-  // without disturbing other visuals that live in `.a-visuals`.
+
   layer.appendChild(img);
 
     imgs.push(img);
@@ -259,8 +258,7 @@ window.showZureteikuVisual = function () {
 
     remove() {
       window.removeEventListener("resize", onResize);
-  // Remove only our dedicated layer so the UMG svg and three canvas
-  // remain intact in the DOM.
+
   if (layer && layer.parentNode) layer.parentNode.removeChild(layer);
     },
   };
