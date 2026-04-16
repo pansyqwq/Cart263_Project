@@ -87,7 +87,7 @@ function initNingyouScene() {
     redSphere.position.set(-1.5, 0.5, 0.8);
     scene.add(redSphere);
 
-    /
+    
     const container = canvas.parentElement || document.body;
     const sizes = {
         width: canvas.clientWidth || container.clientWidth || 300,
