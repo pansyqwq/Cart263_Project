@@ -83,7 +83,6 @@ function initNingyouScene() {
     const lightGray = new THREE.MeshBasicMaterial({ color: 0xcfcfcf });
     const midGray = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
     const darkGray = new THREE.MeshBasicMaterial({ color: 0x7f7f7f });
-    const redMat = new THREE.MeshBasicMaterial({ color: 0x76373c });
 
     const blocks = [
         { x: -5.0, y: 0.0, z: 0, w: 3.2, h: 3.8, d: 1.0, mat: lightGray },
@@ -113,8 +112,8 @@ function initNingyouScene() {
 
                 // Position the model slightly behind the blocks (lower z)
                 modelRoot.position.set(0, -1.0, -2.5);
-                // Apply a conservative scale so the model fits the scene
-                modelRoot.scale.set(1.0, 1.0, 1.0);
+                // scale of the model 
+                modelRoot.scale.set(4.0, 4.0, 4.0);
                 modelRoot.traverse((n) => {
                     if (n.isMesh) {
                         n.receiveShadow = true;
@@ -154,13 +153,7 @@ function initNingyouScene() {
         grayGroup.add(mesh);
     }
 
-    const redSphere = new THREE.Mesh(
-        new THREE.SphereGeometry(0.7, 32, 32),
-        redMat
-    );
-    redSphere.position.set(-1.5, 0.5, 0.8);
-    scene.add(redSphere);
-
+    // red sphere removed per request
     
     const container = canvas.parentElement || document.body;
     const sizes = {
