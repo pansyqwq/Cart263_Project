@@ -18,7 +18,7 @@ function go() {
     !visualsContainer
   ) {
     console.error(
-      "Missing UI element(s). Check IDs: #playStop #pause #volumeSlider #songSelect and .a-visuals"
+      "Missing UI element(s). Check IDs: #playStop #pause #volumeSlider #songSelect and .a-visuals",
     );
     return;
   }
@@ -142,10 +142,13 @@ function go() {
       path.includes("tsumiki") ||
       path.includes("ningyou");
 
+    const isTosenbo = path.includes("tosenbo");
+
     console.log("isPlaying:", isPlaying);
     console.log("isZureteiku:", isZureteiku);
     console.log("isUnknownMotherGoose:", isUnknownMotherGoose);
     console.log("isNingyou:", isNingyou);
+    console.log("isTosenbo:", isTosenbo);
 
     if (!isPlaying) {
       console.log("Visual not started because audio is not playing");
@@ -171,7 +174,10 @@ function go() {
         resetUMGHeart();
         console.log("UMG heart display:", getComputedStyle(umgHeart).display);
         console.log("UMG heart opacity:", getComputedStyle(umgHeart).opacity);
-        console.log("UMG heart visibility:", getComputedStyle(umgHeart).visibility);
+        console.log(
+          "UMG heart visibility:",
+          getComputedStyle(umgHeart).visibility,
+        );
       } else {
         console.error("#umg-heart not found");
       }
@@ -195,6 +201,25 @@ function go() {
         console.log("showNingyouVisual returned:", currentVisual);
       } else {
         console.error("showNingyouVisual is not available");
+      }
+    } else if (isTosenbo) {
+      console.log("Starting TOSENBO visual");
+
+      const umgHeart = getUMGHeart();
+      if (umgHeart) {
+        umgHeart.style.display = "none";
+      }
+
+      const threeCanvas = getThreeCanvas();
+      if (threeCanvas) {
+        threeCanvas.style.display = "none";
+      }
+
+      if (typeof goTosenbo === "function") {
+        currentVisual = goTosenbo(analyser);
+        console.log("goTosenbo returned:", currentVisual);
+      } else {
+        console.error("goTosenbo is not available");
       }
     } else {
       console.log("No matching visual for this song");
