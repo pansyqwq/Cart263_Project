@@ -9,6 +9,8 @@ let sceneRef = null;
 let animationId = null;
 let resizeHandler = null;
 let modelRoot = null;
+let blockStates = null; // per-block audio motion state
+let modelBaseScale = 1;
 
 function getCanvas() {
     return document.querySelector('#three-ex');
@@ -64,8 +66,12 @@ function stopNingyouScene() {
         });
 
         modelRoot = null;
+    modelBaseScale = 1;
     }
     sceneRef = null;
+
+    // clear any block state
+    blockStates = null;
 
     if (canvas) {
         canvas.style.display = 'none';
@@ -114,6 +120,8 @@ function initNingyouScene() {
                 modelRoot.position.set(0, -1.0, -2.5);
                 // scale of the model 
                 modelRoot.scale.set(4.0, 4.0, 4.0);
+                // record base scale so we can modulate it with audio
+                modelBaseScale = modelRoot.scale.x || 1;
                 modelRoot.traverse((n) => {
                     if (n.isMesh) {
                         n.receiveShadow = true;
@@ -140,7 +148,10 @@ function initNingyouScene() {
         console.warn('GLTFLoader not available or failed to load model', e);
     }
 
-    for (const b of blocks) {
+    // Build meshes and per-block audio motion state
+    blockStates = [];
+    for (let i = 0; i < blocks.length; i++) {
+        const b = blocks[i];
         const mesh = new THREE.Mesh(boxGeometry, b.mat);
         mesh.position.set(b.x, b.y, b.z);
         mesh.scale.set(b.w, b.h, b.d);
@@ -151,9 +162,21 @@ function initNingyouScene() {
             mesh.material.depthWrite = true;
         }
         grayGroup.add(mesh);
-    }
 
-    // red sphere removed per request
+        // per-block state for audio-driven motion
+        blockStates.push({
+            mesh,
+            baseX: b.x,
+            baseY: b.y,
+            baseW: b.w,
+            baseH: b.h,
+            phase: Math.random() * Math.PI * 2,
+            baseSpeed: 0.6 + Math.random() * 1.2 + i * 0.08,
+            ampBase: 0.5 + i * 0.6 + Math.random() * 0.8,
+            // determine behavior by material reference
+            type: (b.mat === lightGray) ? 'light' : (b.mat === midGray) ? 'mid' : 'dark'
+        });
+    }
     
     const container = canvas.parentElement || document.body;
     const sizes = {
@@ -197,6 +220,45 @@ function initNingyouScene() {
     };
 
     window.addEventListener('resize', resizeHandler);
+
+    // Return an API so audio.js can call update(vol, dt)
+    return {
+        update(vol, dt) {
+            if (!blockStates) return;
+
+            // Scale the loaded GLB subtly based on audio volume
+            if (modelRoot) {
+                // +/-6% based on vol
+                const scaleFactor = 1 + 0.06 * vol;
+                const s = modelBaseScale * scaleFactor;
+                modelRoot.scale.set(s, s, s);
+            }
+
+            for (const s of blockStates) {
+                const speed = s.baseSpeed + vol * 2.0;
+                const amp = s.ampBase * (0.4 + vol * 1.6);
+                s.phase += speed * dt;
+
+                const offset = Math.sin(s.phase) * amp;
+
+                if (s.type === 'light') {
+                    // move horizontally around baseX
+                    s.mesh.position.x = s.baseX + offset;
+                } else if (s.type === 'mid') {
+                    // move vertically around baseY
+                    s.mesh.position.y = s.baseY + offset;
+                } else if (s.type === 'dark') {
+                    // change scale subtly based on audio
+                    const scale = 1 + 0.06 * Math.abs(offset);
+                    s.mesh.scale.set(s.baseW * scale, s.baseH * scale, 1.0);
+                }
+            }
+        },
+
+        remove() {
+            stopNingyouScene();
+        }
+    };
 }
 
 window.showNingyouVisual = function () {
@@ -218,9 +280,10 @@ window.showNingyouVisual = function () {
     canvas.style.pointerEvents = 'none';
 
     console.debug('showNingyouVisual called, canvas client size:', canvas.clientWidth, canvas.clientHeight);
-    initNingyouScene();
+    const visual = initNingyouScene();
 
     return {
+        update: visual && typeof visual.update === 'function' ? visual.update : undefined,
         remove() {
             stopNingyouScene();
         }
