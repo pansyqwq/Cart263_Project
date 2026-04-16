@@ -110,7 +110,17 @@ window.showZureteikuVisual = function () {
 
   container.style.position = "relative";
   container.style.overflow = "hidden";
-  container.innerHTML = "";
+  // Create a dedicated layer for this visual so other visuals (like #umg-heart
+  // and #three-ex) are not removed when this visual is torn down.
+  const layer = document.createElement('div');
+  layer.className = 'zureteiku-layer';
+  layer.style.position = 'absolute';
+  layer.style.inset = '0';
+  layer.style.width = '100%';
+  layer.style.height = '100%';
+  layer.style.overflow = 'hidden';
+  layer.style.pointerEvents = 'none';
+  container.appendChild(layer);
 
   const files = [
     "images/One.png",
@@ -141,7 +151,9 @@ window.showZureteikuVisual = function () {
     img.style.display = "block";
     img.style.willChange = "transform";
 
-    container.appendChild(img);
+  // Append images into our dedicated layer so they can be removed
+  // without disturbing other visuals that live in `.a-visuals`.
+  layer.appendChild(img);
 
     imgs.push(img);
     if (i === 0) refImg = img;
@@ -164,13 +176,13 @@ window.showZureteikuVisual = function () {
   function buildCircles() {
     if (!refImg || !refImg.naturalWidth) return;
 
-    circles.forEach((c) => c.remove());
+  circles.forEach((c) => c.remove());
     circles = [];
     greyCircle = null;
 
     // Dark circles (bottom layer)
     circles.push(
-      new FitCircle(container, refImg, {
+      new FitCircle(layer, refImg, {
         u: 0.9,
         v: 0.5,
         size: 0.2,
@@ -180,7 +192,7 @@ window.showZureteikuVisual = function () {
     );
 
     circles.push(
-      new FitCircle(container, refImg, {
+      new FitCircle(layer, refImg, {
         u: 0.1,
         v: 0.6,
         size: 0.18,
@@ -190,7 +202,7 @@ window.showZureteikuVisual = function () {
     );
 
     // Grey circle (top layer)
-    greyCircle = new FitCircle(container, refImg, {
+  greyCircle = new FitCircle(layer, refImg, {
       u: 0.5,
       v: 0.5,
       size: 0.16,
@@ -247,7 +259,9 @@ window.showZureteikuVisual = function () {
 
     remove() {
       window.removeEventListener("resize", onResize);
-      container.innerHTML = "";
+  // Remove only our dedicated layer so the UMG svg and three canvas
+  // remain intact in the DOM.
+  if (layer && layer.parentNode) layer.parentNode.removeChild(layer);
     },
   };
 };
