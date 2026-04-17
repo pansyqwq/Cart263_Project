@@ -248,3 +248,37 @@ main {
     width: 20vw;
     height: auto;
 }
+
+/* -- TOSENBO Off Limits Banner -- */
+
+.off-limits-banner-tosenbo {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+    text-align: center;
+    pointer-events: none;
+}
+
+.off-limits-rectangle-tosenbo {
+    position: relative;
+    width: 100vw;
+    height: 55px;
+    background-color: #b4b4b4;
+    border: 2px solid #787878;
+    border-left: none;
+    border-right: none;
+}
+
+.off-limits-text-tosenbo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 1.5rem;
+    color: #787878;
+    margin: 0;
+    z-index: 1;
+}

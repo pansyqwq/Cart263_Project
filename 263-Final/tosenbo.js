@@ -280,6 +280,15 @@ function goTosenbo(analyser) {
   const freqArray = new Uint8Array(analyser.frequencyBinCount);
   const canvas = getCanvas();
 
+  // Create the off-limits banner
+  const banner = document.createElement("div");
+  banner.className = "off-limits-banner-tosenbo";
+  banner.innerHTML = `
+    <div class="off-limits-text-tosenbo">OFF LIMITS_</div>
+    <div class="off-limits-rectangle-tosenbo"></div>
+  `;
+  document.body.appendChild(banner);
+
   if (!canvas) {
     return {
       remove() {},
@@ -355,6 +364,11 @@ function goTosenbo(analyser) {
         animationId = null;
       }
       sceneAPI.remove();
+      // Remove the banner
+      const banner = document.querySelector(".off-limits-banner-tosenbo");
+      if (banner) {
+        banner.remove();
+      }
     },
   };
 }
