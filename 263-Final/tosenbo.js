@@ -125,7 +125,7 @@ function initTosenboScene() {
         modelRoot.position.sub(center);
 
         // Scale the model larger
-        modelRoot.scale.set(10, 10, 10);
+        modelRoot.scale.set(2, 2, 2);
 
         // Wrap in a pivot group so rotation stays centered in the viewport
         modelPivot = new THREE.Group();
@@ -173,8 +173,57 @@ function initTosenboScene() {
   directionalLight.position.set(5, 5, 5);
   scene.add(directionalLight);
 
-  // Animation loop without rotation
+  // Animation loop using rubik-style flips around the model's center
+  let lastRenderTime = performance.now();
+  let flipTimer = 0;
+  const flipInterval = 2.4;
+  const flipDuration = 0.4;
+  let isFlipping = false;
+  let flipStartTime = 0;
+  const startQuat = new THREE.Quaternion();
+  const targetQuat = new THREE.Quaternion();
+  const flipAxes = [new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 1)];
+
+  const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+
+  function beginFlip() {
+    if (!modelPivot) return;
+    isFlipping = true;
+    flipStartTime = performance.now();
+    startQuat.copy(modelPivot.quaternion);
+
+    const axis = flipAxes[Math.random() > 0.5 ? 1 : 0];
+    const direction = Math.random() > 0.5 ? 1 : -1;
+    const flipQuat = new THREE.Quaternion().setFromAxisAngle(
+      axis,
+      (Math.PI / 2) * direction,
+    );
+    targetQuat.copy(startQuat).multiply(flipQuat);
+  }
+
   function animate() {
+    const currentTime = performance.now();
+    const dt = Math.min((currentTime - lastRenderTime) / 1000, 0.033);
+    lastRenderTime = currentTime;
+
+    if (modelPivot) {
+      if (!isFlipping) {
+        flipTimer += dt;
+        if (flipTimer >= flipInterval) {
+          flipTimer = 0;
+          beginFlip();
+        }
+      } else {
+        const elapsed = (currentTime - flipStartTime) / 1000;
+        const t = Math.min(elapsed / flipDuration, 1);
+        const eased = easeInOutQuad(t);
+        modelPivot.quaternion.copy(startQuat.clone().slerp(targetQuat, eased));
+        if (t >= 1) {
+          isFlipping = false;
+        }
+      }
+    }
+
     renderer.render(scene, camera);
     animationId = requestAnimationFrame(animate);
   }
@@ -270,12 +319,25 @@ function goTosenbo(analyser) {
   }
 
   let lastTime = performance.now();
+  let startTime = performance.now();
 
   // Animation loop that syncs with audio
   function animate() {
     const currentTime = performance.now();
     const dt = Math.min((currentTime - lastTime) / 1000, 0.016); // Cap at 16ms
     lastTime = currentTime;
+
+    // Shrink the model over time from 8 to 3.5
+    const elapsed = (currentTime - startTime) / 1000; // seconds
+    const shrinkDuration = 208; // 3 minutes 28 seconds
+    const targetScale = 0.25;
+    const currentScale = Math.max(
+      targetScale,
+      8 - (elapsed / shrinkDuration) * (8 - targetScale),
+    );
+    if (modelPivot) {
+      modelPivot.scale.set(currentScale, currentScale, currentScale);
+    }
 
     const volume = updateAudio();
     const frequency = updateFrequency();
