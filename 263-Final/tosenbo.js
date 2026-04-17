@@ -94,15 +94,19 @@ function initTosenboScene() {
           if (node.isMesh) {
             // Store base position and create animation state
             // Randomly choose direction: vertical or horizontal movement
+            // Some meshes will use amplitude, others will use frequency energy.
             const direction = Math.random() > 0.5 ? "vertical" : "horizontal";
+            const audioType = Math.random() > 0.6 ? "frequency" : "volume";
             meshStates.push({
               mesh: node,
               baseX: node.position.x,
               baseY: node.position.y,
               direction: direction,
+              audioType: audioType,
               phase: Math.random() * Math.PI * 2,
               speed: 1.0 + Math.random() * 2.0,
               amplitude: 0.3 + Math.random() * 0.7,
+              smoothedEnergy: 0,
             });
 
             // Ensure meshes render properly
@@ -121,7 +125,7 @@ function initTosenboScene() {
         modelRoot.position.sub(center);
 
         // Scale the model larger
-        modelRoot.scale.set(2.5, 2.5, 2.5);
+        modelRoot.scale.set(10, 10, 10);
 
         // Wrap in a pivot group so rotation stays centered in the viewport
         modelPivot = new THREE.Group();
@@ -193,12 +197,16 @@ function initTosenboScene() {
 
   // Return update API for audio.js
   return {
-    update(vol, dt) {
+    update(vol, freq, dt) {
       if (!meshStates) return;
 
       for (const state of meshStates) {
-        const speed = state.speed + vol * 0.8;
-        const amp = state.amplitude * (0.5 + vol * 0.6);
+        const energy = state.audioType === "frequency" ? freq : vol;
+        // Smooth the energy value to reduce jitter
+        state.smoothedEnergy += (energy - state.smoothedEnergy) * 0.05; // Low lerp factor for smoothness
+
+        const speed = state.speed + state.smoothedEnergy * 0.3; // Reduced multiplier
+        const amp = state.amplitude * (0.5 + state.smoothedEnergy * 0.4); // Reduced multiplier
         state.phase += speed * dt;
 
         // Move mesh based on its direction (vertical or horizontal)
@@ -220,6 +228,7 @@ function initTosenboScene() {
 // Passes the analyser for the audio from audio.js
 function goTosenbo(analyser) {
   const dataArray = new Uint8Array(analyser.frequencyBinCount);
+  const freqArray = new Uint8Array(analyser.frequencyBinCount);
   const canvas = getCanvas();
 
   if (!canvas) {
@@ -248,6 +257,18 @@ function goTosenbo(analyser) {
     return Math.min(1, rms * 2.5);
   }
 
+  // Function to get frequency data
+  function updateFrequency() {
+    analyser.getByteFrequencyData(freqArray);
+    let sum = 0;
+    for (let i = 0; i < freqArray.length; i++) {
+      const v = freqArray[i] / 255;
+      sum += v * v;
+    }
+    const rms = Math.sqrt(sum / freqArray.length);
+    return Math.min(1, rms * 2.5);
+  }
+
   let lastTime = performance.now();
 
   // Animation loop that syncs with audio
@@ -257,7 +278,8 @@ function goTosenbo(analyser) {
     lastTime = currentTime;
 
     const volume = updateAudio();
-    sceneAPI.update(volume, dt);
+    const frequency = updateFrequency();
+    sceneAPI.update(volume, frequency, dt);
 
     animationId = requestAnimationFrame(animate);
   }
