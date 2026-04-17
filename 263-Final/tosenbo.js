@@ -258,10 +258,10 @@ function initTosenboScene() {
       for (const state of meshStates) {
         const energy = state.audioType === "frequency" ? freq : vol;
         // Smooth the energy value to reduce jitter
-        state.smoothedEnergy += (energy - state.smoothedEnergy) * 0.05; // Low lerp factor for smoothness
+        state.smoothedEnergy += (energy - state.smoothedEnergy) * 0.25;
 
-        const speed = state.speed + state.smoothedEnergy * 0.3; // Reduced multiplier
-        const amp = state.amplitude * (0.5 + state.smoothedEnergy * 0.4); // Reduced multiplier
+        const speed = state.speed + state.smoothedEnergy * 0.3;
+        const amp = state.amplitude * (0.5 + state.smoothedEnergy * 0.4);
         state.phase += speed * dt;
 
         // Move mesh based on its direction (vertical or horizontal)
