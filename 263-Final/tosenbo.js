@@ -14,6 +14,9 @@ function getCanvas() {
   return document.querySelector("#three-ex");
 }
 
+/*
+ * Cleans up the Tosenbo scene and disposes of all resources
+ */
 function stopTosenboScene() {
   const canvas = getCanvas();
 
@@ -68,6 +71,9 @@ function stopTosenboScene() {
   }
 }
 
+/*
+ * Initializes the Three.js scene, loads the GLB model, and sets up animation systems
+ */
 function initTosenboScene() {
   const canvas = getCanvas();
   if (!canvas) return;
@@ -274,7 +280,9 @@ function initTosenboScene() {
   };
 }
 
-// Passes the analyser for the audio from audio.js
+/*
+ * Main entry point for Tosenbo visualization - creates scene, audio analysis, and banner
+ */
 function goTosenbo(analyser) {
   const dataArray = new Uint8Array(analyser.frequencyBinCount);
   const freqArray = new Uint8Array(analyser.frequencyBinCount);
@@ -373,5 +381,5 @@ function goTosenbo(analyser) {
   };
 }
 
-// Exposes globally
+// Exposes globally for audio.js integration
 window.goTosenbo = goTosenbo;

@@ -16,6 +16,9 @@ function getCanvas() {
   return document.querySelector("#three-ex");
 }
 
+/*
+ * Cleans up the Ningyou scene and disposes of all resources
+ */
 function stopNingyouScene() {
   const canvas = getCanvas();
 
@@ -78,6 +81,9 @@ function stopNingyouScene() {
   }
 }
 
+/*
+ * Initializes the Three.js scene with procedural blocks and GLB model background
+ */
 function initNingyouScene() {
   const canvas = getCanvas();
   if (!canvas) return;
@@ -239,6 +245,7 @@ function initNingyouScene() {
         modelRoot.scale.set(s, s, s);
       }
 
+      // Animate blocks based on their material type (light/mid/dark)
       for (const s of blockStates) {
         const speed = s.baseSpeed + vol * 2.0;
         const amp = s.ampBase * (0.4 + vol * 1.6);
@@ -266,6 +273,10 @@ function initNingyouScene() {
   };
 }
 
+/*
+ * Sets up canvas and initializes scene
+ * Exposed globally for audio.js integration
+ */
 window.showNingyouVisual = function () {
   const canvas = getCanvas();
 
