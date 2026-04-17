@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TEST SOUND JS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+         <script src="js/visualsAndAnalysis.js"></script>
+      <script src="js/note.js"></script>
+      <script src="js/particle.js"></script>
+    <script src="js/webaudio.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        canvas {
+            background: black;
+            /*position: absolute;
+            top: 0%;
+            left: 0%; */
+            width: 1000px;
+            height: 500px;
+        }
+
+        .buttons {
+            background-color: rgb(217, 43, 226);
+            color: white;
+            width: max-content;
+            margin-left: 15px;
+            border-color: rgb(229, 167, 232);
+            border-width: 2px;
+            border-style: solid;
+            padding:5px;
+            margin-bottom:5px;
+        
+        }
+
+        .wrapper {
+            display: flex;
+        }
+
+        .buttons:hover {
+            background-color: rgb(229, 167, 232);
+            color: rgb(217, 43, 226);
+            cursor: pointer;
+
+        }
+
+        #message {
+            width: max-content;
+            background-color: rgb(229, 167, 232);
+            padding:5px;
+        }
+
+        select{
+            color: rgb(217, 43, 226);
+            font-size:14px;
+            padding:5px;
+            margin:0;
+            margin-left: 15px;
+            margin-bottom:5px;
+        
+        }
+        input{
+             color: rgb(217, 43, 226);
+            font-size:14px;
+            padding:5px;
+            margin:0;
+            margin-left: 15px;
+            margin-bottom:5px;
+        }
+
+        option{
+            margin:0;
+            padding:0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1> TESTING SOUNDS AND PATTERNS</h1>
+
+    <!-- <div class = "buttons" id = "load-a"> LOAD -A</div>
+          <div class = "buttons" id = "load-b"> LOAD-B</div> -->
+    <p id="message"> state of audio </p>
+  
+    <div class="wrapper">
+           <div class="buttons" id="note-detect"> PLAY NOTE </div>
+           <input id = "freq" type = "number" min="0" max ="4000" value="500" />
+        <div class="buttons" id="start"> START</div>
+        <div class="buttons" id="stop"> STOP</div>
+        <select name="sound_dropdown" id="sound_dropdown">
+            <option value="select">SELECT</option>
+            <option value="arpeggio2.mp3">arpeggio2</option>
+            <option value="drum-samples_loops_blueyellow.mp3">blueYellow</option>
+            <option value = "soulprodmusic-nightfall-future-bass-music-228100.mp3">slow</option>
+        </select>
+        
+    </div>
+
+    <canvas id="testCanvas" width=1000 height=500></canvas>
+
+
+</body>
+
+</html>
