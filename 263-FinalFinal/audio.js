@@ -417,6 +417,6 @@ const aStatement = document.querySelector("#statement");
 
 if (aStatement) {
   aStatement.addEventListener("click", () => {
-    window.open("cart263_midterm_artistStatement.pdf", "_blank");
+    window.open("cart263FinalResponse.pdf", "_blank");
   });
 }
