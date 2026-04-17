@@ -330,7 +330,7 @@ function goTosenbo(analyser) {
     // Shrink the model over time from 8 to 3.5
     const elapsed = (currentTime - startTime) / 1000; // seconds
     const shrinkDuration = 208; // 3 minutes 28 seconds
-    const targetScale = 0.25;
+    const targetScale = 0.75;
     const currentScale = Math.max(
       targetScale,
       8 - (elapsed / shrinkDuration) * (8 - targetScale),

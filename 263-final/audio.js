@@ -274,6 +274,20 @@ function go() {
     currentSource.connect(analyser);
     currentSource.start(0);
 
+    // Stop automatically when audio ends
+    currentSource.onended = () => {
+      isPlaying = false;
+      isPaused = false;
+      playStopBtn.textContent = "▶";
+      pauseBtn.textContent = "⏸";
+      pauseBtn.classList.remove("is-paused");
+      stopVisualLoop();
+      if (currentVisual && typeof currentVisual.remove === "function") {
+        currentVisual.remove();
+        currentVisual = null;
+      }
+    };
+
     isPlaying = true;
     isPaused = false;
     playStopBtn.textContent = "⏹";
@@ -352,7 +366,7 @@ function go() {
       playStopBtn.textContent = "▶";
 
       await ensureAudioRunning();
-      startFromBuffer(true);
+      startFromBuffer(false);
     } catch (e) {
       console.error(e);
     }
@@ -363,7 +377,7 @@ function go() {
     if (!currentBuffer) return;
 
     if (!isPlaying) {
-      startFromBuffer(true);
+      startFromBuffer(false);
     } else {
       stopSource();
       playStopBtn.textContent = "▶";
